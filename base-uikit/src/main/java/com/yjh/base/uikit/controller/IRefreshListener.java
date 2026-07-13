@@ -1,4 +1,4 @@
-package com.yjh.base.uikit.listener;
+package com.yjh.base.uikit.controller;
 
 public interface IRefreshListener {
     void onRefresh();

@@ -3,7 +3,6 @@ package com.yjh.base.uikit.controller;
 import android.app.Activity;
 import android.view.View;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import com.yjh.base.uikit.listener.IRefreshListener;
 import com.yjh.base.utils.util.LogUtils;
 
 /**
