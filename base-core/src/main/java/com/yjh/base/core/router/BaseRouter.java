@@ -7,7 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.yjh.base.core.annotation.IntentParam;
-import com.yjh.base.core.util.LogUtils;
+import com.yjh.base.utils.util.LogUtils;
 import java.lang.reflect.Field;
 
 /**
@@ -54,7 +54,7 @@ public class BaseRouter {
                         Object value = extras.get(key);
                         field.set(target, value);
                     } catch (Exception e) {
-                        LogUtils.error("BaseRouter", "参数注入失败: " + field.getName() + " -> " + e.getMessage());
+                        LogUtils.error(TAG, "参数注入失败: " + field.getName() + " -> " + e.getMessage());
                     }
                 }
             }

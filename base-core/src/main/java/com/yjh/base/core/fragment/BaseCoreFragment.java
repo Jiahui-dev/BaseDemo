@@ -1,11 +1,14 @@
-package com.yjh.base.core.activity;
+package com.yjh.base.core.fragment;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.viewbinding.ViewBinding;
+import androidx.fragment.app.Fragment;
 import com.yjh.base.core.annotation.InjectPresenter;
 import com.yjh.base.core.contract.IBasePresenter;
 import com.yjh.base.core.contract.IBaseView;
@@ -21,16 +24,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import androidx.viewbinding.ViewBinding;
 
 /**
  * 逻辑基类，管理 Presenter 和 Controller 生命周期的 Activity 基类，基于“组合优于继承”思想
- * Created by jiahui on 2026/07/11
+ * Created by jiahui on 2026/07/13
  */
-public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompatActivity implements IBaseView {
+public abstract class BaseCoreFragment<VB extends ViewBinding> extends Fragment implements IBaseView {
 
-    private static final String TAG = "BaseCoreActivity";
+    private static final String TAG = "BaseCoreFragment";
 
     protected VB binding;
+
+    protected Activity mActivity;
+
+    protected View mRootView;
+
+    private boolean mIsFirstInit = true;
 
     //存放所有自动注入的Presenter
     private final List<IBasePresenter> mPresenterList = new ArrayList<>();
@@ -39,55 +49,77 @@ public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompat
     private final Map<String, Lifecycle> mControllers = new HashMap<>();
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        //通过反射自动化加载 ViewBinding
-        initViewBinding();
-
-        // 让子类在这个时机去注册它需要的 Controller（此时布局已经塞进去了，可以放心拿 rootView）
-        onRegisterControllers();
-
-        // 路由注入与 Presenter 自动绑定
-        BaseRouter.getInstance().inject(this);
-        injectPresenters();
-
-        // 驱动状态机：内存初始化就绪
-        dispatchLifecycleEvent(LifecycleEvent.ON_INIT);
-
-        // Activity 自身的 View 初始化
-        initView();
-        // 驱动状态机：通知所有插件——View 已经绑定完毕！
-        // 此时 Controller 内部的 case ON_VIEW_CREATED 绝对可以安全地拿到各个控件！
-        dispatchLifecycleEvent(LifecycleEvent.ON_VIEW_CREATED);
-
-        initListener();
-        initData();
-        // 驱动状态机：数据流就绪
-        dispatchLifecycleEvent(LifecycleEvent.ON_DATA_INIT);
-
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof Activity) {
+            this.mActivity = (Activity) context;
+        }
     }
 
-    /**
-     * 供子类调用：往插排上“插插件”
-     */
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        if (mRootView == null) {
+            mIsFirstInit = true;
+            // 利用反射自动创建 ViewBinding 实例，干掉 LayoutId
+            binding = initViewBinding(inflater, container);
+            if (binding != null) {
+                mRootView = binding.getRoot();
+            }
+        } else {
+            mIsFirstInit = false;
+            binding = initViewBinding(inflater, container);
+        }
+        // 缓存机制：防止 Fragment 切换时重复把同一个 View 添加到 Container 导致崩溃
+        if (mRootView != null) {
+            ViewGroup parent = (ViewGroup) mRootView.getParent();
+            if (parent != null) {
+                parent.removeView(mRootView);
+            }
+        }
+        return mRootView;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // 只有第一次初始化视图时，才走状态机的核心初始化流程
+        if (mIsFirstInit) {
+            // 子类去注册 Controller 插件
+            onRegisterControllers();
+
+            // 注入路由参数与 Presenter
+            BaseRouter.getInstance().inject(this);
+            injectPresenters();
+
+            // 驱动状态机：初始化就绪
+            dispatchLifecycleEvent(LifecycleEvent.ON_INIT);
+
+            // 驱动自身与子类 View 初始化
+            initView();
+            dispatchLifecycleEvent(LifecycleEvent.ON_VIEW_CREATED);
+
+            // 驱动自身与子类数据流就绪
+            initListener();
+            initData();
+            dispatchLifecycleEvent(LifecycleEvent.ON_DATA_INIT);
+
+            mIsFirstInit = false;
+        }
+    }
+
     protected void registerController(String key, Lifecycle controller) {
         if (controller != null && !mControllers.containsKey(key)) {
             mControllers.put(key, controller);
         }
     }
 
-    /**
-     * 供子类调用：可以通过 Key 拿到具体的插件实例（比如在 Activity 里控制加载 Footer 的样式）
-     */
     @SuppressWarnings("unchecked")
     protected <T extends Lifecycle> T getController(String key) {
         return (T) mControllers.get(key);
     }
 
-    /**
-     * 分发逻辑：遍历所有控制器，驱动他们的状态机流转
-     */
     private void dispatchLifecycleEvent(LifecycleEvent event) {
         for (Lifecycle controller : mControllers.values()) {
             if (controller != null) {
@@ -95,11 +127,6 @@ public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompat
             }
         }
     }
-
-    /**
-     * 在这里子类可以写：setContentView(R.layout.activity_main);
-     * 或者写 ViewBinding 的加载。
-     */
 
     protected abstract void onRegisterControllers();
 
@@ -112,52 +139,55 @@ public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompat
     protected void initData() {
     }
 
-
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
         dispatchLifecycleEvent(LifecycleEvent.ON_START);
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         dispatchLifecycleEvent(LifecycleEvent.ON_RESUME);
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
         dispatchLifecycleEvent(LifecycleEvent.ON_PAUSE);
     }
 
     @Override
-    protected void onStop() {
+    public void onStop() {
         super.onStop();
         dispatchLifecycleEvent(LifecycleEvent.ON_STOP);
     }
 
     @Override
-    protected void onDestroy() {
-        // 通知所有控制器进行最后的销毁和内存清理
+    public void onDestroy() {
+        // 通知所有插件彻底清理内存
         dispatchLifecycleEvent(LifecycleEvent.ON_DESTROY);
-
-        // 强行清空集合，彻底断开Activity对所有控制器的强引用，确保0内存泄漏
         mControllers.clear();
 
-        // Presenter 解绑
+        // Presenter 彻底解绑
         for (IBasePresenter presenter : mPresenterList) {
             presenter.detachView();
         }
         mPresenterList.clear();
-        binding = null;
-        super.onDestroy();
 
+        super.onDestroy();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // 为了防止 Fragment 实例存活但视图销毁时的内存泄漏，必须在此处把 binding 强行置空！
+        binding = null;
     }
 
     @Override
     public Activity getActivityContext() {
-        return this;
+        return mActivity;
     }
 
     private void injectPresenters() {
@@ -181,26 +211,26 @@ public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompat
     }
 
     /**
-     * 自动解析泛型 VB 并执行 inflate，完成自动 setContentView
+     * 自动解析泛型 VB 的 inflate 方法
      */
     @SuppressWarnings("unchecked")
-    private void initViewBinding() {
+    private VB initViewBinding(LayoutInflater inflater, ViewGroup container) {
         try {
-            // 获取当前类的带泛型的父类 (即 BaseCoreActivity<XxxBinding>)
+            // 获取当前类的父类泛型信息
             Type type = getClass().getGenericSuperclass();
             if (type instanceof ParameterizedType) {
                 Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
-                // 拿到泛型 VB 的 Class 对象
+                // 拿到 VB 具体的 Class 对象
                 Class<VB> clazz = (Class<VB>) actualTypeArguments[0];
-                // 拿到 XxxBinding.inflate(LayoutInflater) 方法
-                Method method = clazz.getMethod("inflate", LayoutInflater.class);
-                // 执行 inflate 方法得到 binding 实例
-                binding = (VB) method.invoke(null, getLayoutInflater());
-                setContentView(binding.getRoot());
+                // 找到 VB 的 inflate(LayoutInflater, ViewGroup, boolean) 方法
+                Method method = clazz.getMethod("inflate", LayoutInflater.class, ViewGroup.class, boolean.class);
+                // 调用并返回 ViewBinding 实例
+                return (VB) method.invoke(null, inflater, container, false);
             }
         } catch (Exception e) {
-            LogUtils.error(TAG, "自动初始化 ViewBinding 失败，请检查泛型是否正确："+e);
+            e.printStackTrace();
         }
+        return null;
     }
 
 }

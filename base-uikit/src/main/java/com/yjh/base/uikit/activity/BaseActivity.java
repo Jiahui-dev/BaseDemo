@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
+import androidx.viewbinding.ViewBinding;
 import com.gyf.immersionbar.ImmersionBar;
 import com.yjh.base.core.activity.BaseCoreActivity;
 import com.yjh.base.uikit.R;
@@ -17,7 +18,7 @@ import java.util.Objects;
  * 逻辑基类：{@link BaseCoreActivity}
  * Created by jiahui on 2026/07/13
  */
-public abstract class BaseActivity extends BaseCoreActivity {
+public abstract class BaseActivity<VB extends ViewBinding> extends BaseCoreActivity<VB> {
 
     private static final String TAG = "BaseActivity";
 
@@ -38,11 +39,6 @@ public abstract class BaseActivity extends BaseCoreActivity {
 
     }
 
-    @Override
-    protected void initLayout() {
-
-    }
-
     protected View getTitleBarView() { return null; }
     protected int getStatusBarColor() { return R.color.uikit_grey_backGround; } // 规范资源前缀
     protected boolean isStatusBarDarkFont() { return true; }
@@ -52,6 +48,7 @@ public abstract class BaseActivity extends BaseCoreActivity {
                 .statusBarColor(getStatusBarColor())
                 .statusBarDarkFont(isStatusBarDarkFont())
                 .titleBar(getTitleBarView())
+                //.fitsSystemWindows(true)
                 .keyboardEnable(true)
                 .init();
     }

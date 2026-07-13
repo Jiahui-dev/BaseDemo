@@ -43,7 +43,7 @@
             android:paddingEnd="13dp"
             android:text="确定"
             android:background="@drawable/uikit_bg_btn_yellow"
-            android:textColor="@color/text_color3"
+            android:textColor="@color/uikit_text_color3"
             android:textSize="16sp" />
     </RelativeLayout>
 
