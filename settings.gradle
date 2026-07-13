@@ -24,3 +24,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "BaseDemo"
 include ':app'
+include ':base-core'
+include ':base-uikit'
+include ':base-utils'

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/tab_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_centerHorizontal="true"
+        android:scaleType="centerInside" />
+
+    <TextView
+        android:id="@+id/tab_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tab_icon"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="2dp"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/tv_tab_unread"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/tab_icon"
+        android:layout_alignEnd="@id/tab_icon"
+        android:layout_marginEnd="-4dp"
+        android:background="@drawable/bg_red_dot"
+        android:gravity="center"
+        android:minWidth="14dp"
+        android:minHeight="14dp"
+        android:textColor="#FFFFFF"
+        android:textSize="10sp"
+        android:visibility="gone" />
+</RelativeLayout>

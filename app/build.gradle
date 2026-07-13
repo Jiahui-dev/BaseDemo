@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace 'com.leben.basedemo'
+    namespace 'com.yjh.basedemo'
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -38,4 +38,7 @@ dependencies {
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
+
+    implementation project(':base-uikit')
+
 }
