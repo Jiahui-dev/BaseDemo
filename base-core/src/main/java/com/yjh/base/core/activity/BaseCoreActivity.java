@@ -188,14 +188,14 @@ public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompat
         try {
             // 1. 获取当前类泛型中的 ViewBinding 类型
             java.lang.reflect.ParameterizedType type = (java.lang.reflect.ParameterizedType) getClass().getGenericSuperclass();
-            Class<?> clazz = (Class<?>) type.getActualTypeArguments()[1]; // 假设你的 VB 是第二个泛型
+            Class<?> clazz = (Class<?>) type.getActualTypeArguments()[1];
 
             try {
-                // 🌟 尝试一：反射最常用的三参数 inflate 方法 (LayoutInflater, ViewGroup, boolean)
+                // 反射最常用的三参数 inflate 方法 (LayoutInflater, ViewGroup, boolean)
                 java.lang.reflect.Method method = clazz.getMethod("inflate", android.view.LayoutInflater.class, android.view.ViewGroup.class, boolean.class);
                 binding = (VB) method.invoke(null, getLayoutInflater(), null, false);
             } catch (NoSuchMethodException e) {
-                // 🌟 尝试二：如果找不到，再降级去反射单参数的 inflate 方法 (LayoutInflater)
+                // 如果找不到，再降级去反射单参数的 inflate 方法 (LayoutInflater)
                 java.lang.reflect.Method method = clazz.getMethod("inflate", android.view.LayoutInflater.class);
                 binding = (VB) method.invoke(null, getLayoutInflater());
             }

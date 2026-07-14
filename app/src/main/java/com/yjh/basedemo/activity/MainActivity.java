@@ -68,6 +68,7 @@ public class MainActivity extends BaseRecyclerActivity<CollectionBean, AcMyColle
         } else {
             // 🌟 上拉加载成功：数据喂给基类，第二个参数传入是否有下一页（比如总共5页）
             boolean hasMore = page < 5;
+            binding.tvCollectionCount.setText("当前共收藏了 " + resultList.size()*page + " 个宝贝aaa");
             loadMoreSuccess(resultList, hasMore);
         }
     }
