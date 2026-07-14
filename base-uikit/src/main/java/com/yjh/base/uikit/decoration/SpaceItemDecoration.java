@@ -5,6 +5,9 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+/**
+ * Created by jiahui on 2026/02/09
+ */
 public class SpaceItemDecoration extends RecyclerView.ItemDecoration {
 
     private final int space;//间距大小（px）

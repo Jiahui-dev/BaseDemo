@@ -5,7 +5,7 @@ import android.app.Application;
 import android.content.Context;
 
 /**
- * Created by jiahui on 2026/07/11
+ * Created by jiahui on 2025/12/16
  */
 public class BaseApplication extends Application {
     // 提供一个静态的 Context，方便在类似 Utils 里使用

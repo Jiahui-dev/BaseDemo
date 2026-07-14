@@ -12,6 +12,8 @@ import com.yjh.base.utils.util.ToastUtils;
 import java.util.Objects;
 
 /**
+ * UI视觉样式基类
+ * 逻辑基类：{@link BaseCoreFragment}
  * Created by jiahui on 2026/07/13
  */
 public abstract class BaseFragment<VB extends ViewBinding> extends BaseCoreFragment<VB> {

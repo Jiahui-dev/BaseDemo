@@ -4,13 +4,14 @@ import android.app.Activity;
 import android.view.View;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.yjh.base.utils.util.LogUtils;
+import com.yjh.base.core.lifecycle.Lifecycle;
+import com.yjh.base.core.lifecycle.LifecycleEvent;
 
 /**
  * 封装官方的 swiperefreshlayout
  * Created by jiahui on 2026/01/29
  */
-
-public class SwipeRefreshController {
+public class SwipeRefreshController implements Lifecycle {
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
@@ -113,4 +114,13 @@ public class SwipeRefreshController {
     }
 
 
+    @Override
+    public void onLifecycleChanged(LifecycleEvent event) {
+        if (event == LifecycleEvent.ON_DESTROY) {
+            mListener = null;
+            if (mSwipeRefreshLayout != null) {
+                mSwipeRefreshLayout.setOnRefreshListener(null);
+            }
+        }
+    }
 }

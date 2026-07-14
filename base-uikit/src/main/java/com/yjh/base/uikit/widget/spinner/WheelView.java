@@ -12,6 +12,9 @@ import android.widget.Scroller;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Created by jiahui on 2025/12/16
+ */
 public class WheelView extends View {
     private List<String> data = new ArrayList<>();
     private Paint paint;

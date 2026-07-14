@@ -10,7 +10,6 @@ import java.util.List;
  * ViewPager2 强制使用 FragmentStateAdapter
  * Created by jiahui on 2026/01/30
  */
-
 public class CommonFragmentAdapter extends FragmentStateAdapter {
 
     private final List<Fragment> mFragmentList;

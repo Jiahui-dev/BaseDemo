@@ -186,20 +186,26 @@ public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompat
     @SuppressWarnings("unchecked")
     private void initViewBinding() {
         try {
-            // 获取当前类的带泛型的父类 (即 BaseCoreActivity<XxxBinding>)
-            Type type = getClass().getGenericSuperclass();
-            if (type instanceof ParameterizedType) {
-                Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
-                // 拿到泛型 VB 的 Class 对象
-                Class<VB> clazz = (Class<VB>) actualTypeArguments[0];
-                // 拿到 XxxBinding.inflate(LayoutInflater) 方法
-                Method method = clazz.getMethod("inflate", LayoutInflater.class);
-                // 执行 inflate 方法得到 binding 实例
+            // 1. 获取当前类泛型中的 ViewBinding 类型
+            java.lang.reflect.ParameterizedType type = (java.lang.reflect.ParameterizedType) getClass().getGenericSuperclass();
+            Class<?> clazz = (Class<?>) type.getActualTypeArguments()[1]; // 假设你的 VB 是第二个泛型
+
+            try {
+                // 🌟 尝试一：反射最常用的三参数 inflate 方法 (LayoutInflater, ViewGroup, boolean)
+                java.lang.reflect.Method method = clazz.getMethod("inflate", android.view.LayoutInflater.class, android.view.ViewGroup.class, boolean.class);
+                binding = (VB) method.invoke(null, getLayoutInflater(), null, false);
+            } catch (NoSuchMethodException e) {
+                // 🌟 尝试二：如果找不到，再降级去反射单参数的 inflate 方法 (LayoutInflater)
+                java.lang.reflect.Method method = clazz.getMethod("inflate", android.view.LayoutInflater.class);
                 binding = (VB) method.invoke(null, getLayoutInflater());
+            }
+
+            if (binding != null) {
                 setContentView(binding.getRoot());
             }
         } catch (Exception e) {
-            LogUtils.error(TAG, "自动初始化 ViewBinding 失败，请检查泛型是否正确："+e);
+            e.printStackTrace();
+            LogUtils.error("自动初始化 ViewBinding 失败，请检查泛型是否正确：" + e.getMessage());
         }
     }
 

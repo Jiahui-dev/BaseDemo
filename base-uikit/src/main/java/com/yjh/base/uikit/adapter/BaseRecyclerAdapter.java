@@ -14,7 +14,6 @@ import java.util.List;
  * 通用 RecyclerView 适配器基类
  * Created by jiahui on 2026/01/28
  */
-
 public abstract class BaseRecyclerAdapter<T> extends RecyclerView.Adapter<BaseViewHolder> {
 
     protected Context mContext;
