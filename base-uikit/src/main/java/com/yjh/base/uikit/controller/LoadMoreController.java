@@ -75,6 +75,12 @@ public class LoadMoreController implements Lifecycle {
                 .inflate(R.layout.uikit_view_load_more,mRecyclerView,false);
         mTvLoading=mFooterView.findViewById(R.id.tv_loading);
         mPbLoading=mFooterView.findViewById(R.id.pb_loading);
+
+        mPbLoading.setVisibility(View.GONE);
+        if (mTvLoading != null) {
+            mTvLoading.setVisibility(View.GONE);
+        }
+        mAdapter.addFooterView(mFooterView);
     }
 
     private void initListener() {
@@ -137,45 +143,50 @@ public class LoadMoreController implements Lifecycle {
         return max;
     }
 
-    private void startLoadMore(){
-        isLoading=true;
+    private void startLoadMore() {
+        isLoading = true;
         mPbLoading.setVisibility(View.VISIBLE);
         mTvLoading.setVisibility(View.VISIBLE);
         mTvLoading.setText("正在加载...");
 
-        //移除点击事件 (防止正在加载时用户狂点)
         mFooterView.setOnClickListener(null);
 
-        mAdapter.addFooterView(mFooterView);
-        //回调给 Activity
-        if(mListener!=null){
+        // 回调给 Activity
+        if (mListener != null) {
             mListener.onLoadMore();
         }
     }
 
-    public void loadMoreSuccess(boolean hasMoreData){
-        this.isLoading=false;
-        this.hasMore=hasMoreData;
-        mAdapter.removeFooterView();
-        if(!hasMoreData){
+    public void loadMoreSuccess(boolean hasMoreData) {
+        this.isLoading = false;
+        this.hasMore = hasMoreData;
+
+        if (hasMoreData) {
+            // 还有更多：隐藏加载提示，等待下一次滚动触发
             mPbLoading.setVisibility(View.GONE);
+            mTvLoading.setVisibility(View.GONE);
+            mFooterView.setOnClickListener(null);
+        } else {
+            // 已经到底了：显示到底提示
+            mPbLoading.setVisibility(View.GONE);
+            mTvLoading.setVisibility(View.VISIBLE);
             mTvLoading.setText("已经到底啦");
-            mAdapter.addFooterView(mFooterView);
+            mFooterView.setOnClickListener(null);
         }
     }
 
     public void loadMoreFail() {
         this.isLoading = false;
 
-        if(mPbLoading!=null){
+        if (mPbLoading != null) {
             mPbLoading.setVisibility(View.GONE);
         }
-        if(mTvLoading!=null){
+        if (mTvLoading != null) {
             mTvLoading.setVisibility(View.VISIBLE);
-            mTvLoading.setText("加载失败,点击重试");
+            mTvLoading.setText("加载失败, 点击重试");
         }
-        if(mFooterView!=null){
-            mFooterView.setOnClickListener(v->{
+        if (mFooterView != null) {
+            mFooterView.setOnClickListener(v -> {
                 startLoadMore();
             });
         }
@@ -184,21 +195,23 @@ public class LoadMoreController implements Lifecycle {
     /**
      * 重置控制器状态
      */
-    public void reset(boolean hasMoreData,String endFooterText) {
+    public void reset(boolean hasMoreData, String endFooterText) {
         this.isLoading = false;
         this.hasMore = hasMoreData;
-        mAdapter.removeFooterView();
 
-        // 如果刷新完直接就判定没有更多数据了（例如单页列表，或者不支持加载更多的页面）
-        if (!hasMoreData) {
+        if (hasMoreData) {
+            // 如果刷新后还有数据，重置底部状态为不可见状态
+            if (mPbLoading != null) mPbLoading.setVisibility(View.GONE);
+            if (mTvLoading != null) mTvLoading.setVisibility(View.GONE);
+            mFooterView.setOnClickListener(null);
+        } else {
+            // 如果刷新完直接没数据了，展示到底提示
             if (mPbLoading != null) mPbLoading.setVisibility(View.GONE);
             if (mTvLoading != null) {
                 mTvLoading.setVisibility(View.VISIBLE);
-                mTvLoading.setText(endFooterText!=null? endFooterText :"已经到底啦");
+                mTvLoading.setText(endFooterText != null ? endFooterText : "已经到底啦");
             }
-            //没有更多数据时，清除掉点击事件
             mFooterView.setOnClickListener(null);
-            mAdapter.addFooterView(mFooterView);
         }
     }
     /**

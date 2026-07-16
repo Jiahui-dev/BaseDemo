@@ -63,21 +63,25 @@ public class MainActivity extends BaseRecyclerActivity<CollectionBean, AcMyColle
     }
 
     private void requestCollectionData(int page) {
-        // 假设这里去异步调用了网络请求...
-        boolean isSuccess = true;
-        List<CollectionBean> resultList = getMockData(page);
+        binding.tvCollectionCount.setText("数据加载中...");
 
-        if (page == 1) {
-            // 🌟 下拉刷新成功：数据喂给基类，基类自动刷新列表、关闭刷新、计算缺省页状态
-            refreshListSuccess(resultList);
-            // 更新顶部魔改卡片的数据
-            binding.tvCollectionCount.setText("当前共收藏了 " + resultList.size() + " 个宝贝");
-        } else {
-            // 🌟 上拉加载成功：数据喂给基类，第二个参数传入是否有下一页（比如总共5页）
-            boolean hasMore = page < 5;
-            binding.tvCollectionCount.setText("当前共收藏了 " + resultList.size()*page + " 个宝贝aaa");
-            loadMoreSuccess(resultList, hasMore);
-        }
+        // 模拟 800 毫秒的网络延迟
+        binding.getRoot().postDelayed(() -> {
+            // 确保 Activity 没有被销毁
+            if (isFinishing() || isDestroyed()) return;
+
+            List<CollectionBean> resultList = getMockData(page);
+
+            if (page == 1) {
+                refreshListSuccess(resultList);
+                binding.tvCollectionCount.setText("当前共收藏了 " + resultList.size() + " 个宝贝");
+            } else {
+                boolean hasMore = page < 5;
+                // 先加数据，LoadMoreController 内部会自动处理 FooterView 的移除与状态更新
+                loadMoreSuccess(resultList, hasMore);
+                binding.tvCollectionCount.setText("当前共收藏了 " + (resultList.size() * page) + " 个宝贝");
+            }
+        }, 800); // 延迟 800ms 执行
     }
 
     // 模拟数据源

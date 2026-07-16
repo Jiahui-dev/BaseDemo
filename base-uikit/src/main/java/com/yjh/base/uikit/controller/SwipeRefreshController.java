@@ -26,7 +26,7 @@ public class SwipeRefreshController implements Lifecycle {
     private long mStartTime;
 
     //定义刷新 UI 最少要转多久
-    private static final int MIN_DURATION = 2000;
+    private static final int MIN_DURATION = 1500;
 
     private IRefreshListener mListener;
 
