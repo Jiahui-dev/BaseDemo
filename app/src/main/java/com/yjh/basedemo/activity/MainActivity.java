@@ -1,5 +1,7 @@
 package com.yjh.basedemo.activity;
 
+import android.view.LayoutInflater;
+
 import androidx.recyclerview.widget.RecyclerView;
 import com.yjh.base.uikit.activity.BaseRecyclerActivity;
 import com.yjh.base.uikit.adapter.BaseRecyclerAdapter;
@@ -18,6 +20,11 @@ public class MainActivity extends BaseRecyclerActivity<CollectionBean, AcMyColle
     @Override
     protected BaseRecyclerAdapter<CollectionBean> createAdapter() {
         return new MyCollectionAdapter(this);
+    }
+
+    @Override
+    protected AcMyCollectionBinding onBindingInflate(LayoutInflater inflater) {
+        return AcMyCollectionBinding.inflate(inflater);
     }
 
     @Override

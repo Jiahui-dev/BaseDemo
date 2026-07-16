@@ -42,8 +42,13 @@ public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompat
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //通过反射自动化加载 ViewBinding
-        initViewBinding();
+        // 非反射的初始化方法
+        binding = onBindingInflate(getLayoutInflater());
+        if (binding != null) {
+            setContentView(binding.getRoot());
+        } else {
+            LogUtils.error(TAG,"ViewBinding 绑定失败，请检查 onBindingInflate 实现！");
+        }
 
         // 让子类在这个时机去注册它需要的 Controller（此时布局已经塞进去了，可以放心拿 rootView）
         onRegisterControllers();
@@ -100,8 +105,9 @@ public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompat
      * 在这里子类可以写：setContentView(R.layout.activity_main);
      * 或者写 ViewBinding 的加载。
      */
-
     protected abstract void onRegisterControllers();
+
+    protected abstract VB onBindingInflate(LayoutInflater inflater);
 
     protected void initView() {
     }
@@ -177,35 +183,6 @@ public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompat
                     LogUtils.error("@InjectPresenter 失败：", e);
                 }
             }
-        }
-    }
-
-    /**
-     * 自动解析泛型 VB 并执行 inflate，完成自动 setContentView
-     */
-    @SuppressWarnings("unchecked")
-    private void initViewBinding() {
-        try {
-            // 1. 获取当前类泛型中的 ViewBinding 类型
-            java.lang.reflect.ParameterizedType type = (java.lang.reflect.ParameterizedType) getClass().getGenericSuperclass();
-            Class<?> clazz = (Class<?>) type.getActualTypeArguments()[1];
-
-            try {
-                // 反射最常用的三参数 inflate 方法 (LayoutInflater, ViewGroup, boolean)
-                java.lang.reflect.Method method = clazz.getMethod("inflate", android.view.LayoutInflater.class, android.view.ViewGroup.class, boolean.class);
-                binding = (VB) method.invoke(null, getLayoutInflater(), null, false);
-            } catch (NoSuchMethodException e) {
-                // 如果找不到，再降级去反射单参数的 inflate 方法 (LayoutInflater)
-                java.lang.reflect.Method method = clazz.getMethod("inflate", android.view.LayoutInflater.class);
-                binding = (VB) method.invoke(null, getLayoutInflater());
-            }
-
-            if (binding != null) {
-                setContentView(binding.getRoot());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            LogUtils.error("自动初始化 ViewBinding 失败，请检查泛型是否正确：" + e.getMessage());
         }
     }
 
