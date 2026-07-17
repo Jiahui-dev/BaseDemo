@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/uikit_layout_empty"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="32dp">
+
+    <!-- 缺省插画：可以换成你们设计切的全局通用空状态图 -->
+    <ImageView
+        android:id="@+id/uikit_iv_empty"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:contentDescription="暂无数据"
+        android:src="@drawable/ic_launcher_background" />
+
+    <!-- 主提示语 -->
+    <TextView
+        android:id="@+id/uikit_tv_empty_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="暂无相关内容"
+        android:textColor="#999999"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <!-- 副提示语（可选，留空或隐藏） -->
+    <TextView
+        android:id="@+id/uikit_tv_empty_sub"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="这里空空如也，换个页面看看吧"
+        android:textColor="#CCCCCC"
+        android:textSize="13sp"
+        android:visibility="gone" />
+
+</LinearLayout>

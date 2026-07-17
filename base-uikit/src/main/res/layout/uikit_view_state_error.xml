@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/uikit_layout_error"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="32dp">
+
+    <!-- 错误插画：通常是断网或者服务器报错的 icon -->
+    <ImageView
+        android:id="@+id/uikit_iv_error"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:contentDescription="网络异常"
+        android:src="@drawable/ic_launcher_background" />
+
+    <!-- 主提示语 -->
+    <TextView
+        android:id="@+id/uikit_tv_error_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="网络或服务开小差了"
+        android:textColor="#666666"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <!-- 副提示语 -->
+    <TextView
+        android:id="@+id/uikit_tv_error_sub"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="请检查网络设置或稍后重试"
+        android:textColor="#999999"
+        android:textSize="13sp" />
+
+    <!-- 核心操作：重试按钮 -->
+    <Button
+        android:id="@+id/uikit_btn_retry"
+        android:layout_width="120dp"
+        android:layout_height="36dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/bg_btn_yellow"
+        android:text="重新加载"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp" />
+
+</LinearLayout>

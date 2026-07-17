@@ -1,21 +1,22 @@
 package com.yjh.base.uikit.activity;
 
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewStub;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
+import com.yjh.base.uikit.R;
 import com.yjh.base.uikit.adapter.SimpleAdapter;
 import com.yjh.base.uikit.controller.IRefreshListener;
 import com.yjh.base.uikit.controller.LoadMoreController;
 import com.yjh.base.uikit.controller.StateController;
 import com.yjh.base.uikit.controller.SwipeRefreshController;
 import com.yjh.base.uikit.decoration.SpaceItemDecoration;
-import com.yjh.base.uikit.databinding.UikitLayoutBaseRecyclerBinding;
 import java.util.List;
 
 /**
- *
- * 默认使用标准单列表布局 LayoutBaseRecyclerBinding。
- * 如果业务需要大改，直接通过泛型传入自定义的 ViewBinding 即可
+ * 在 BaseActivity 基础上增加了 Controller 和一些抽象方法
  * Created by jiahui on 2026/07/14
  */
 public abstract class BaseRecyclerActivity<T,VB extends ViewBinding> extends BaseActivity<VB> {
@@ -31,8 +32,7 @@ public abstract class BaseRecyclerActivity<T,VB extends ViewBinding> extends Bas
     protected void initView() {
         super.initView();
 
-        // 1. 获取列表控件
-        mRecyclerView = getRecyclerView();
+        mRecyclerView = attachRecyclerView();
         if (mRecyclerView != null) {
             mRecyclerView.setLayoutManager(getLayoutManager());
             if (shouldAddDefaultSpaceDecoration()) {
@@ -44,7 +44,10 @@ public abstract class BaseRecyclerActivity<T,VB extends ViewBinding> extends Bas
 
             // 2. 初始化多状态页
             mStateController = new StateController(this, mRecyclerView);
-            initStatusViewStub(mStateController);
+            // 优先尝试子类的定制 ViewStub，如果没有，基类动态注入全局默认兜底
+            if (!initStatusViewStub(mStateController)) {
+                initStatusViews(mStateController);
+            }
             registerController("state_controller", mStateController);
 
             // 3. 初始化分页
@@ -59,8 +62,9 @@ public abstract class BaseRecyclerActivity<T,VB extends ViewBinding> extends Bas
     @Override
     protected void onRegisterControllers() {
         super.onRegisterControllers();
-        if (getSwipeRefreshLayoutId() != 0) {
-            mRefreshController = new SwipeRefreshController(this, getSwipeRefreshLayoutId());
+        View refreshView = attachRefreshLayout();
+        if (refreshView != null) {
+            mRefreshController = new SwipeRefreshController(this, refreshView);
             // 如果子类本身实现了 IRefreshListener，直接绑定
             if (this instanceof IRefreshListener) {
                 mRefreshController.setOnRefreshListener((IRefreshListener) this);
@@ -70,35 +74,22 @@ public abstract class BaseRecyclerActivity<T,VB extends ViewBinding> extends Bas
     }
 
     /**
-     * 默认寻找默认单列表布局里的 contentView
-     * 如果子类魔改了布局，重写此方法返回自定义的 RecyclerView 即可
+     * 挂载子类布局中的 RecyclerView 实例
      */
-    protected RecyclerView getRecyclerView() {
-        if (binding instanceof UikitLayoutBaseRecyclerBinding) {
-            return ((UikitLayoutBaseRecyclerBinding) binding).contentView;
-        }
+    protected abstract RecyclerView attachRecyclerView();
+
+    /**
+     * 挂载子类布局中的刷新布局实例（如 SwipeRefreshLayout / SmartRefreshLayout）
+     */
+    protected View attachRefreshLayout() {
         return null;
     }
 
-    /**
-     * 默认寻找默认单列表布局里的刷新控件 ID
-     */
-    protected int getSwipeRefreshLayoutId() {
-        if (binding instanceof UikitLayoutBaseRecyclerBinding) {
-            return ((UikitLayoutBaseRecyclerBinding) binding).swipeRefresh.getId();
-        }
-        return 0;
-    }
-
-    protected void initStatusViewStub(StateController stateController) {
-        if (binding instanceof UikitLayoutBaseRecyclerBinding) {
-            UikitLayoutBaseRecyclerBinding defaultBinding = (UikitLayoutBaseRecyclerBinding) binding;
-            stateController.setEmptyViewStub(defaultBinding.emptyStub);
-            stateController.setErrorViewStub(defaultBinding.errorStub);
-        }
-    }
-
     protected abstract SimpleAdapter<T, ? extends ViewBinding> createAdapter();
+
+    protected boolean initStatusViewStub(StateController stateController) {
+        return false;
+    }
 
     public void onLoadMore() {}
 
@@ -114,9 +105,16 @@ public abstract class BaseRecyclerActivity<T,VB extends ViewBinding> extends Bas
         refreshComplete();
         if (mAdapter != null) mAdapter.setList(list);
         if (mStateController != null) mStateController.handleData(list);
+
         if (mLoadMoreController != null) {
-            mLoadMoreController.reset(isSupportLoadMore(), getEndFooterText());
+            // 健壮性修复：如果第一页数据为空，或者数量特别少（比如少于10条），直接判定为没有更多，避免滑不动还显示加载
+            boolean hasMore = isSupportLoadMore() && list != null && list.size() >= getPageSize();
+            mLoadMoreController.updateLoadingState(hasMore, getEndFooterText());
         }
+    }
+
+    protected int getPageSize() {
+        return 15;
     }
 
     public void refreshListFailed(String msg) {
@@ -133,8 +131,12 @@ public abstract class BaseRecyclerActivity<T,VB extends ViewBinding> extends Bas
     }
 
     public void loadMoreSuccess(List<T> list, boolean hasMore) {
-        if (mAdapter != null) mAdapter.addList(list);
-        if (mLoadMoreController != null) mLoadMoreController.loadMoreSuccess(hasMore);
+        if (mLoadMoreController != null) {
+            mLoadMoreController.loadMoreSuccess(hasMore);
+        }
+        if (mAdapter != null) {
+            mAdapter.addList(list);
+        }
     }
 
     public void loadMoreFailed() {
@@ -150,5 +152,30 @@ public abstract class BaseRecyclerActivity<T,VB extends ViewBinding> extends Bas
     protected boolean isSupportLoadMore() { return true; }
 
     public void showContent() { if (mStateController != null) mStateController.showContent(); }
+
+    /**
+     * 动态注入全局默认的缺省页兜底
+     */
+    private void initStatusViews(StateController stateController) {
+        if (mRecyclerView == null || mRecyclerView.getParent() == null) return;
+
+        ViewGroup parent = (ViewGroup) mRecyclerView.getParent();
+
+        // 动态创建空状态 ViewStub 并添加到父布局中
+        ViewStub emptyStub = new ViewStub(this);
+        // R.layout.uikit_view_state_empty 为你底层 common/uikit 模块里的通用标准空布局
+        emptyStub.setLayoutResource(R.layout.uikit_view_state_empty);
+        parent.addView(emptyStub, new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        stateController.setEmptyViewStub(emptyStub);
+
+        // 动态创建错误状态 ViewStub 并添加到父布局中
+        ViewStub errorStub = new ViewStub(this);
+        // R.layout.uikit_view_state_error 为你底层的通用标准错误布局
+        errorStub.setLayoutResource(R.layout.uikit_view_state_error);
+        parent.addView(errorStub, new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        stateController.setErrorViewStub(errorStub);
+    }
 
 }

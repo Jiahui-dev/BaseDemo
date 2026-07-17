@@ -2,6 +2,8 @@ package com.yjh.base.uikit.controller;
 
 import android.app.Activity;
 import android.view.View;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.yjh.base.utils.util.LogUtils;
 import com.yjh.base.core.lifecycle.Lifecycle;
@@ -14,6 +16,7 @@ import java.util.List;
 /**
  * 封装官方的 swiperefreshlayout
  * Created by jiahui on 2026/01/29
+ * Updated by jiahui on 2026/07/17 (支持直接传入 View 对象)
  */
 public class SwipeRefreshController implements Lifecycle {
 
@@ -41,26 +44,23 @@ public class SwipeRefreshController implements Lifecycle {
             android.R.color.holo_purple
     };
 
-    // 构造函数：传入 Activity 和 控件ID
-    public SwipeRefreshController(Activity activity, int refreshLayoutId) {
-        View view = activity.findViewById(refreshLayoutId);
-        if (view instanceof SwipeRefreshLayout) {
-            mSwipeRefreshLayout = (SwipeRefreshLayout) view;
+    /**
+     * 核心构造函数：直接接收现成的 View 对象（支持 ViewBinding 直接挂载）
+     */
+    public SwipeRefreshController(@NonNull View refreshView) {
+        if (refreshView instanceof SwipeRefreshLayout) {
+            mSwipeRefreshLayout = (SwipeRefreshLayout) refreshView;
             initConfig();
         } else {
-            LogUtils.error("ID对应的控件必须是 SwipeRefreshLayout");
+            LogUtils.error("传入的 View 必须是 SwipeRefreshLayout 类型");
         }
     }
 
-    // 构造函数：直接传入 View (用于 Fragment 或 动态布局)
-    public SwipeRefreshController(View rootView, int refreshLayoutId) {
-        View view = rootView.findViewById(refreshLayoutId);
-        if (view instanceof SwipeRefreshLayout) {
-            mSwipeRefreshLayout = (SwipeRefreshLayout) view;
-            initConfig();
-        } else {
-            LogUtils.error("ID对应的控件必须是 SwipeRefreshLayout");
-        }
+    /**
+     * 【新增】兼容旧设计的扩展构造：方便在 Base 模块里统一多参调用
+     */
+    public SwipeRefreshController(Activity activity, @NonNull View refreshView) {
+        this(refreshView);
     }
 
     private void initConfig() {
@@ -154,7 +154,6 @@ public class SwipeRefreshController implements Lifecycle {
             mSwipeRefreshLayout.setEnabled(enable);
         }
     }
-
 
     @Override
     public void onLifecycleChanged(LifecycleEvent event) {

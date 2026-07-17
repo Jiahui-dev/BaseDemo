@@ -1,6 +1,8 @@
 package com.yjh.basedemo.activity;
 
 import android.view.LayoutInflater;
+import android.view.View;
+
 import androidx.recyclerview.widget.RecyclerView;
 import com.yjh.base.uikit.activity.BaseRecyclerActivity;
 import com.yjh.base.uikit.adapter.SimpleAdapter;
@@ -28,6 +30,16 @@ public class MainActivity extends BaseRecyclerActivity<CollectionBean, AcMyColle
                     // binding.btnDelete.setOnClickListener(v -> { ... });
                 }
         );
+    }
+
+    @Override
+    protected RecyclerView attachRecyclerView() {
+        return binding.rvCollectionList;
+    }
+
+    @Override
+    protected View attachRefreshLayout() {
+        return binding.swipeRefreshLayout;
     }
 
     @Override
@@ -60,22 +72,12 @@ public class MainActivity extends BaseRecyclerActivity<CollectionBean, AcMyColle
         requestCollectionData(mCurrentPage);
     }
 
-    @Override
-    protected RecyclerView getRecyclerView() {
-        return binding.rvCollectionList;
-    }
 
-    @Override
-    protected int getSwipeRefreshLayoutId() {
-        return binding.swipeRefreshLayout.getId();
-    }
 
     private void requestCollectionData(int page) {
         binding.tvCollectionCount.setText("数据加载中...");
 
-        // 模拟 800 毫秒的网络延迟
         binding.getRoot().postDelayed(() -> {
-            // 确保 Activity 没有被销毁
             if (isFinishing() || isDestroyed()) return;
 
             List<CollectionBean> resultList = getMockData(page);
@@ -84,12 +86,13 @@ public class MainActivity extends BaseRecyclerActivity<CollectionBean, AcMyColle
                 refreshListSuccess(resultList);
                 binding.tvCollectionCount.setText("当前共收藏了 " + resultList.size() + " 个宝贝");
             } else {
+                // 如果最多只有5页，当 page == 5 时，代表这已经是最后一页了，后面没有了 (hasMore = false)
                 boolean hasMore = page < 5;
-                // 先加数据，LoadMoreController 内部会自动处理 FooterView 的移除与状态更新
+
                 loadMoreSuccess(resultList, hasMore);
-                binding.tvCollectionCount.setText("当前共收藏了 " + (resultList.size() * page) + " 个宝贝");
+                binding.tvCollectionCount.setText("当前共收藏了 " + (mAdapter.getItemCount()) + " 个宝贝");
             }
-        }, 800); // 延迟 800ms 执行
+        }, 500);
     }
 
     // 模拟数据源

@@ -1,8 +1,6 @@
 package com.yjh.base.uikit.controller;
 
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -10,7 +8,6 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.viewbinding.ViewBinding;
 import com.yjh.base.core.lifecycle.Lifecycle;
 import com.yjh.base.core.lifecycle.LifecycleEvent;
-import com.yjh.base.uikit.R;
 import com.yjh.base.uikit.adapter.SimpleAdapter;
 import com.yjh.base.uikit.databinding.UikitViewLoadMoreBinding;
 
@@ -24,9 +21,6 @@ public class LoadMoreController implements Lifecycle {
     private OnLoadMoreListener mListener;
     // 直接持有加载更多布局的强类型 Binding 实例，废弃原生 View 和 TextView 的声明
     private UikitViewLoadMoreBinding mFooterBinding;
-    private View mFooterView;
-    private View mPbLoading;
-    private TextView mTvLoading;
     private boolean isLoading=false;//是否正在加载
     private boolean hasMore=true;//是否还有更多数据
 
@@ -166,17 +160,38 @@ public class LoadMoreController implements Lifecycle {
         this.isLoading = false;
         this.hasMore = hasMoreData;
 
+        if (mFooterBinding == null) return;
+
+        // 1. 无论是否还有更多，立刻隐藏转圈的 ProgressBar
+        mFooterBinding.pbLoading.setVisibility(View.GONE);
+        mFooterBinding.getRoot().setOnClickListener(null);
+
         if (hasMoreData) {
-            // 还有更多：隐藏加载提示，等待下一次滚动触发
-            mPbLoading.setVisibility(View.GONE);
-            mTvLoading.setVisibility(View.GONE);
-            mFooterView.setOnClickListener(null);
+            // 还有更多数据，直接隐藏文字提示，等待下次滑动
+            mFooterBinding.tvLoading.setVisibility(View.GONE);
         } else {
-            // 已经到底了：显示到底提示
-            mPbLoading.setVisibility(View.GONE);
-            mTvLoading.setVisibility(View.VISIBLE);
-            mTvLoading.setText("已经到底啦");
-            mFooterView.setOnClickListener(null);
+            // 【核心修复】：最后一页到底了
+            // 不要立刻改成“已经到底啦”！先让它保持现状（或者暂时 GONE）
+            // 延迟 150ms 变字，确保 15 条新数据已经完全被渲染并把 Footer 挤到了屏幕下方
+            if (mRecyclerView != null) {
+                mRecyclerView.postDelayed(() -> {
+                    // 双重校验环境安全
+                    if (mFooterBinding == null || mRecyclerView == null) return;
+
+                    RecyclerView.LayoutManager lm = mRecyclerView.getLayoutManager();
+                    int totalItem = lm != null ? lm.getItemCount() : 0;
+
+                    // 健壮性防错：如果总条数很少（不够一屏），直接隐藏
+                    if (totalItem <= mPreloadThreshold + 2) {
+                        mFooterBinding.tvLoading.setVisibility(View.GONE);
+                    } else {
+                        // 此时新数据已上屏，Footer 已经被挤到屏幕外面了
+                        // 在这里静默把文字改成“已经到底啦”，用户在滑到最底部时才能看到，视觉上完美无缝
+                        mFooterBinding.tvLoading.setVisibility(View.VISIBLE);
+                        mFooterBinding.tvLoading.setText("已经到底啦");
+                    }
+                }, 150); // 150 毫秒足够绝大多数手机完成一帧的 RecyclerView 绘制
+            }
         }
     }
 
@@ -194,23 +209,27 @@ public class LoadMoreController implements Lifecycle {
     }
 
     /**
-     * 重置控制器状态
+     * 更新控制器状态
      */
-    public void reset(boolean hasMoreData, String endFooterText) {
+    public void updateLoadingState(boolean hasMoreData, String endFooterText) {
         this.isLoading = false;
         this.hasMore = hasMoreData;
 
         if (mFooterBinding == null) return;
 
+        mFooterBinding.pbLoading.setVisibility(View.GONE);
+        mFooterBinding.getRoot().setOnClickListener(null);
+
         if (hasMoreData) {
-            mFooterBinding.pbLoading.setVisibility(View.GONE);
             mFooterBinding.tvLoading.setVisibility(View.GONE);
-            mFooterBinding.getRoot().setOnClickListener(null);
         } else {
-            mFooterBinding.pbLoading.setVisibility(View.GONE);
-            mFooterBinding.tvLoading.setVisibility(View.VISIBLE);
-            mFooterBinding.tvLoading.setText(endFooterText != null ? endFooterText : "已经到底啦");
-            mFooterBinding.getRoot().setOnClickListener(null);
+            RecyclerView.LayoutManager lm = mRecyclerView != null ? mRecyclerView.getLayoutManager() : null;
+            if (lm != null && lm.getItemCount() <= 5) { // 不足满屏数据时不展示到底提示
+                mFooterBinding.tvLoading.setVisibility(View.GONE);
+            } else {
+                mFooterBinding.tvLoading.setVisibility(View.VISIBLE);
+                mFooterBinding.tvLoading.setText(endFooterText != null ? endFooterText : "已经到底啦");
+            }
         }
     }
     /**
