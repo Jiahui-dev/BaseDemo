@@ -1,15 +1,13 @@
 package com.yjh.basedemo.activity;
 
 import android.view.LayoutInflater;
-
 import androidx.recyclerview.widget.RecyclerView;
 import com.yjh.base.uikit.activity.BaseRecyclerActivity;
-import com.yjh.base.uikit.adapter.BaseRecyclerAdapter;
+import com.yjh.base.uikit.adapter.SimpleAdapter;
 import com.yjh.base.uikit.controller.IRefreshListener;
-import com.yjh.basedemo.adapter.MyCollectionAdapter;
 import com.yjh.basedemo.databinding.AcMyCollectionBinding;
+import com.yjh.basedemo.databinding.ItemCollectionBinding;
 import com.yjh.basedemo.model.bean.CollectionBean;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,12 +16,22 @@ public class MainActivity extends BaseRecyclerActivity<CollectionBean, AcMyColle
     private int mCurrentPage = 1;
 
     @Override
-    protected BaseRecyclerAdapter<CollectionBean> createAdapter() {
-        return new MyCollectionAdapter(this);
+    protected SimpleAdapter<CollectionBean, ItemCollectionBinding> createAdapter() {
+        return new SimpleAdapter<>(
+                this,
+                ItemCollectionBinding::inflate, // 传入条目 ViewBinding 渲染器
+                (binding, data, position) -> {   // 传入强类型数据绑定逻辑
+                    // 100% 强类型 ViewBinding 赋值，杜绝任何 findViewById 或额外 Holder 文件
+                    binding.tvCollectionName.setText(data.getName());
+
+                    // 如果需要，这里可以直接方便地为子 View 加点击事件
+                    // binding.btnDelete.setOnClickListener(v -> { ... });
+                }
+        );
     }
 
     @Override
-    protected AcMyCollectionBinding onBindingInflate(LayoutInflater inflater) {
+    protected AcMyCollectionBinding initBinding(LayoutInflater inflater) {
         return AcMyCollectionBinding.inflate(inflater);
     }
 

@@ -43,7 +43,7 @@ public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompat
         super.onCreate(savedInstanceState);
 
         // 非反射的初始化方法
-        binding = onBindingInflate(getLayoutInflater());
+        binding = initBinding(getLayoutInflater());
         if (binding != null) {
             setContentView(binding.getRoot());
         } else {
@@ -107,7 +107,7 @@ public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompat
      */
     protected abstract void onRegisterControllers();
 
-    protected abstract VB onBindingInflate(LayoutInflater inflater);
+    protected abstract VB initBinding(LayoutInflater inflater);
 
     protected void initView() {
     }

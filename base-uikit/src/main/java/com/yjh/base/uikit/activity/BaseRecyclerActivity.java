@@ -3,7 +3,7 @@ package com.yjh.base.uikit.activity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
-import com.yjh.base.uikit.adapter.BaseRecyclerAdapter;
+import com.yjh.base.uikit.adapter.SimpleAdapter;
 import com.yjh.base.uikit.controller.IRefreshListener;
 import com.yjh.base.uikit.controller.LoadMoreController;
 import com.yjh.base.uikit.controller.StateController;
@@ -21,7 +21,7 @@ import java.util.List;
 public abstract class BaseRecyclerActivity<T,VB extends ViewBinding> extends BaseActivity<VB> {
 
     protected RecyclerView mRecyclerView;
-    protected BaseRecyclerAdapter<T> mAdapter;
+    protected SimpleAdapter<T, ? extends ViewBinding> mAdapter;
     protected StateController mStateController;
     protected LoadMoreController mLoadMoreController;
     protected SwipeRefreshController mRefreshController;
@@ -98,7 +98,7 @@ public abstract class BaseRecyclerActivity<T,VB extends ViewBinding> extends Bas
         }
     }
 
-    protected abstract BaseRecyclerAdapter<T> createAdapter();
+    protected abstract SimpleAdapter<T, ? extends ViewBinding> createAdapter();
 
     public void onLoadMore() {}
 

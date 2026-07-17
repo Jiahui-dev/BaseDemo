@@ -7,10 +7,12 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+import androidx.viewbinding.ViewBinding;
 import com.yjh.base.core.lifecycle.Lifecycle;
 import com.yjh.base.core.lifecycle.LifecycleEvent;
 import com.yjh.base.uikit.R;
-import com.yjh.base.uikit.adapter.BaseRecyclerAdapter;
+import com.yjh.base.uikit.adapter.SimpleAdapter;
+import com.yjh.base.uikit.databinding.UikitViewLoadMoreBinding;
 
 /**
  * Created by jiahui on 2026/01/28
@@ -18,8 +20,10 @@ import com.yjh.base.uikit.adapter.BaseRecyclerAdapter;
 public class LoadMoreController implements Lifecycle {
 
     private RecyclerView mRecyclerView;
-    private BaseRecyclerAdapter<?> mAdapter;
+    private SimpleAdapter<?, ? extends ViewBinding> mAdapter;
     private OnLoadMoreListener mListener;
+    // 直接持有加载更多布局的强类型 Binding 实例，废弃原生 View 和 TextView 的声明
+    private UikitViewLoadMoreBinding mFooterBinding;
     private View mFooterView;
     private View mPbLoading;
     private TextView mTvLoading;
@@ -46,9 +50,7 @@ public class LoadMoreController implements Lifecycle {
                 mRecyclerView = null;
                 mAdapter = null;
                 mListener = null;
-                mFooterView = null;
-                mPbLoading = null;
-                mTvLoading = null;
+                mFooterBinding = null; // 释放内存
                 mScrollListener = null;
                 break;
             default:
@@ -64,25 +66,27 @@ public class LoadMoreController implements Lifecycle {
         this.mListener = listener;
     }
 
-    public LoadMoreController(RecyclerView recyclerView, BaseRecyclerAdapter<?> adapter){
-        this.mRecyclerView=recyclerView;
-        this.mAdapter=adapter;
+    public LoadMoreController(RecyclerView recyclerView, SimpleAdapter<?, ? extends ViewBinding> adapter) {
+        this.mRecyclerView = recyclerView;
+        this.mAdapter = adapter;
         initFooter();
     }
 
-    private void initFooter(){
-        mFooterView= LayoutInflater.from(mRecyclerView.getContext())
-                .inflate(R.layout.uikit_view_load_more,mRecyclerView,false);
-        mTvLoading=mFooterView.findViewById(R.id.tv_loading);
-        mPbLoading=mFooterView.findViewById(R.id.pb_loading);
+    private void initFooter() {
+        if (mAdapter == null || mRecyclerView == null) return;
 
-        mPbLoading.setVisibility(View.GONE);
-        if (mTvLoading != null) {
-            mTvLoading.setVisibility(View.GONE);
+        // 直接调用我们为 SimpleAdapter 设计的 setFooterView，
+        mAdapter.setFooterView(UikitViewLoadMoreBinding::inflate, mRecyclerView);
+
+        // 从适配器拿到强类型的加载布局 Binding 实例
+        mFooterBinding = mAdapter.getFooterBinding();
+
+        if (mFooterBinding != null) {
+            // 初始化为隐藏状态
+            mFooterBinding.pbLoading.setVisibility(View.GONE);
+            mFooterBinding.tvLoading.setVisibility(View.GONE);
         }
-        mAdapter.addFooterView(mFooterView);
     }
-
     private void initListener() {
         // 防止重复绑定监听器
         if (mRecyclerView == null || mScrollListener != null) return;
@@ -145,13 +149,14 @@ public class LoadMoreController implements Lifecycle {
 
     private void startLoadMore() {
         isLoading = true;
-        mPbLoading.setVisibility(View.VISIBLE);
-        mTvLoading.setVisibility(View.VISIBLE);
-        mTvLoading.setText("正在加载...");
 
-        mFooterView.setOnClickListener(null);
+        if (mFooterBinding != null) {
+            mFooterBinding.pbLoading.setVisibility(View.VISIBLE);
+            mFooterBinding.tvLoading.setVisibility(View.VISIBLE);
+            mFooterBinding.tvLoading.setText("正在加载...");
+            mFooterBinding.getRoot().setOnClickListener(null);
+        }
 
-        // 回调给 Activity
         if (mListener != null) {
             mListener.onLoadMore();
         }
@@ -178,18 +183,14 @@ public class LoadMoreController implements Lifecycle {
     public void loadMoreFail() {
         this.isLoading = false;
 
-        if (mPbLoading != null) {
-            mPbLoading.setVisibility(View.GONE);
-        }
-        if (mTvLoading != null) {
-            mTvLoading.setVisibility(View.VISIBLE);
-            mTvLoading.setText("加载失败, 点击重试");
-        }
-        if (mFooterView != null) {
-            mFooterView.setOnClickListener(v -> {
-                startLoadMore();
-            });
-        }
+        if (mFooterBinding == null) return;
+
+        mFooterBinding.pbLoading.setVisibility(View.GONE);
+        mFooterBinding.tvLoading.setVisibility(View.VISIBLE);
+        mFooterBinding.tvLoading.setText("加载失败, 点击重试");
+
+        // 绑定点击重试事件到根布局上
+        mFooterBinding.getRoot().setOnClickListener(v -> startLoadMore());
     }
 
     /**
@@ -199,19 +200,17 @@ public class LoadMoreController implements Lifecycle {
         this.isLoading = false;
         this.hasMore = hasMoreData;
 
+        if (mFooterBinding == null) return;
+
         if (hasMoreData) {
-            // 如果刷新后还有数据，重置底部状态为不可见状态
-            if (mPbLoading != null) mPbLoading.setVisibility(View.GONE);
-            if (mTvLoading != null) mTvLoading.setVisibility(View.GONE);
-            mFooterView.setOnClickListener(null);
+            mFooterBinding.pbLoading.setVisibility(View.GONE);
+            mFooterBinding.tvLoading.setVisibility(View.GONE);
+            mFooterBinding.getRoot().setOnClickListener(null);
         } else {
-            // 如果刷新完直接没数据了，展示到底提示
-            if (mPbLoading != null) mPbLoading.setVisibility(View.GONE);
-            if (mTvLoading != null) {
-                mTvLoading.setVisibility(View.VISIBLE);
-                mTvLoading.setText(endFooterText != null ? endFooterText : "已经到底啦");
-            }
-            mFooterView.setOnClickListener(null);
+            mFooterBinding.pbLoading.setVisibility(View.GONE);
+            mFooterBinding.tvLoading.setVisibility(View.VISIBLE);
+            mFooterBinding.tvLoading.setText(endFooterText != null ? endFooterText : "已经到底啦");
+            mFooterBinding.getRoot().setOnClickListener(null);
         }
     }
     /**

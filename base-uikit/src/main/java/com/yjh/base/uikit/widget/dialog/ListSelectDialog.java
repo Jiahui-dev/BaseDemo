@@ -7,8 +7,8 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.yjh.base.uikit.R;
-import com.yjh.base.uikit.adapter.BaseRecyclerAdapter;
-import com.yjh.base.uikit.adapter.holder.BaseViewHolder;
+import com.yjh.base.uikit.adapter.SimpleAdapter;
+import com.yjh.base.uikit.databinding.UnkitItemSimpleTextBinding;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class ListSelectDialog<T> extends BaseDialog {
     /**
      * 定义点击回调接口
      */
-    public interface OnItemClickListener<T> {
+    private interface OnItemClickListener<T> {
         void onItemClick(T item, int position);
     }
 
@@ -58,12 +58,10 @@ public class ListSelectDialog<T> extends BaseDialog {
         return R.layout.uikit_dialog_list;
     }
 
-    @Override
     protected void initView(View root) {
         TextView tvTitle = root.findViewById(R.id.tv_dialog_title);
         RecyclerView rvList = root.findViewById(R.id.rv_dialog_list);
 
-        // 1. 设置标题 (如果不设置则 GONE，符合靠左悬浮逻辑)
         if (!TextUtils.isEmpty(mTitle)) {
             tvTitle.setText(mTitle);
             tvTitle.setVisibility(View.VISIBLE);
@@ -71,27 +69,26 @@ public class ListSelectDialog<T> extends BaseDialog {
             tvTitle.setVisibility(View.GONE);
         }
 
-        // 2. 配置 RecyclerView
         rvList.setLayoutManager(new LinearLayoutManager(getContext()));
-        BaseRecyclerAdapter<T> adapter = new BaseRecyclerAdapter<T>(getContext()) {
-            @Override
-            protected int getItemLayoutId(int viewType) {
-                return R.layout.unkit_item_simple_text;
-            }
 
-            @Override
-            protected void bindData(BaseViewHolder holder, T data, int position) {
-                String showText = (mConverter != null) ? mConverter.convert(data) : data.toString();
-                holder.setText(R.id.tv_item_text, showText);
+        // 直接实例化 SimpleAdapter，传入 Creator 和 Binder
+        SimpleAdapter<T, UnkitItemSimpleTextBinding> adapter = new SimpleAdapter<>(
+                getContext(),
+                UnkitItemSimpleTextBinding::inflate, // 传入条目 ViewBinding 的渲染器
+                (binding, data, position) -> {
+                    String showText = (mConverter != null) ? mConverter.convert(data) : data.toString();
 
-                holder.itemView.setOnClickListener(v -> {
-                    if (mListener != null) {
-                        mListener.onItemClick(data, position);
-                    }
-                    dismiss();
-                });
+                    binding.tvItemText.setText(showText);
+                }
+        );
+
+        adapter.setOnItemClickListener((view, viewId, position, data) -> {
+            if (mListener != null) {
+                mListener.onItemClick(data, position);
             }
-        };
+            dismiss();
+        });
+
         rvList.setAdapter(adapter);
         adapter.setList(mData);
 
