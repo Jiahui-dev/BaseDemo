@@ -40,7 +40,8 @@ public abstract class BaseActivity<VB extends ViewBinding> extends BaseCoreActiv
     }
 
     protected View getTitleBarView() { return null; }
-    protected int getStatusBarColor() { return R.color.uikit_grey_backGround; } // 规范资源前缀
+    protected int getStatusBarColor() { return R.color.uikit_grey_backGround; }
+
     protected boolean isStatusBarDarkFont() { return true; }
 
     protected void initImmersionBar() {

@@ -20,4 +20,11 @@
     </style>
 
 
+    <!-- 优雅平滑的进出动画 -->
+    <style name="uikit_SmoothBottomSheetAnimation">
+        <item name="android:windowEnterAnimation">@anim/uikit_anim_bottom_sheet_enter</item>
+        <item name="android:windowExitAnimation">@anim/uikit_anim_bottom_sheet_exit</item>
+    </style>
+
+
 </resources>

@@ -1,14 +1,12 @@
-package com.yjh.base.uikit.widget.dialog;
+package com.yjh.base.uikit.widget.dialog.bottom;
 
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
@@ -16,8 +14,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
  * 通用底部弹窗基类
  * Created by jiahui on 2026/02/02
  */
-
-public abstract class BaseBottomSheetDialog extends BottomSheetDialogFragment {
+public abstract class BaseBottomDialog extends BottomSheetDialogFragment {
 
     protected View mRootView;
 

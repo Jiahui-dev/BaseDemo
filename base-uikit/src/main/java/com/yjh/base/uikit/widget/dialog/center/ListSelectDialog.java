@@ -1,4 +1,4 @@
-package com.yjh.base.uikit.widget.dialog;
+package com.yjh.base.uikit.widget.dialog.center;
 
 import android.text.TextUtils;
 import android.view.View;
@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.yjh.base.uikit.R;
 import com.yjh.base.uikit.adapter.SimpleAdapter;
 import com.yjh.base.uikit.databinding.UnkitItemSimpleTextBinding;
+
 import java.util.ArrayList;
 import java.util.List;
 

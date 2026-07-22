@@ -1,4 +1,4 @@
-package com.yjh.base.uikit.widget.dialog;
+package com.yjh.base.uikit.widget.dialog.center;
 
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;

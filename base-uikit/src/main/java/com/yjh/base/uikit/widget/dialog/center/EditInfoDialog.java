@@ -1,4 +1,4 @@
-package com.yjh.base.uikit.widget.dialog;
+package com.yjh.base.uikit.widget.dialog.center;
 
 import android.os.Bundle;
 import android.text.InputType;
@@ -10,13 +10,14 @@ import android.widget.EditText;
 import android.widget.TextView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.yjh.base.uikit.R;
+import com.yjh.base.uikit.widget.dialog.bottom.BaseBottomDialog;
 import com.yjh.base.uikit.widget.titleBar.TitleBar;
 
 /**
  * Created by jiahui on 2026/04/06
  */
 
-public class EditInfoDialog extends BaseBottomSheetDialog {
+public class EditInfoDialog extends BaseBottomDialog {
 
     private TitleBar titleBar;
     private EditText etContent;

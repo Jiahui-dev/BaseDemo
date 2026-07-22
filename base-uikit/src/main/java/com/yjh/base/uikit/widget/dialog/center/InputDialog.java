@@ -1,4 +1,4 @@
-package com.yjh.base.uikit.widget.dialog;
+package com.yjh.base.uikit.widget.dialog.center;
 
 import android.text.InputType;
 import android.text.TextUtils;
