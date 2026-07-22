@@ -2,13 +2,16 @@ package com.yjh.base.uikit.widget.dialog.bottom;
 
 import android.view.View;
 import android.widget.LinearLayout;
+
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
+
 import com.yjh.base.uikit.R;
 import com.yjh.base.uikit.adapter.SimpleAdapter;
 import com.yjh.base.uikit.databinding.UikitItemGridPageBinding;
 import com.yjh.base.uikit.databinding.UikitItemGridPanelOptionBinding;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,27 +28,20 @@ public class GridPanelBottomDialog<T> extends BaseBottomDialog {
     private int mColumns = 3;    // 列数
     private List<T> mTotalList = new ArrayList<>();
 
+    // 控制是否显示 Item 图标下方的文字
+    private boolean mShowItemName = true;
+
     private ItemBinder<T> mItemBinder;
     private OnItemClickListener<T> mListener;
 
-    // 绑定接口：外部决定怎么把 T 绑定到标准的图标+文本 ViewBinding 上
     public interface ItemBinder<T> {
         void onBind(UikitItemGridPanelOptionBinding binding, T data, int position);
     }
 
-    // 点击事件接口
     public interface OnItemClickListener<T> {
         void onItemClick(T data, int globalPosition);
     }
 
-    /**
-     * 构建方法
-     * @param rows 行数 (如 2)
-     * @param columns 列数 (如 3)
-     * @param list 数据列表
-     * @param binder 数据绑定器
-     * @param listener 点击监听
-     */
     public static <T> GridPanelBottomDialog<T> newInstance(
             int rows,
             int columns,
@@ -62,6 +58,14 @@ public class GridPanelBottomDialog<T> extends BaseBottomDialog {
         return dialog;
     }
 
+    /**
+     * 设置是否显示每个图标下方的文字（tv_item_name）
+     */
+    public GridPanelBottomDialog<T> showTitle(boolean show) {
+        this.mShowItemName = show;
+        return this;
+    }
+
     @Override
     protected int getLayoutId() {
         return R.layout.uikit_dialog_grid_panel;
@@ -73,12 +77,11 @@ public class GridPanelBottomDialog<T> extends BaseBottomDialog {
         mDotContainer = root.findViewById(R.id.ll_dot_container);
 
         int pageSize = mRows * mColumns;
-        int totalSize = mTotalList.size();
 
-        // 1. 将总数据按每页容量切片
+        // 1. 切割数据
         List<List<T>> pagesData = partitionList(mTotalList, pageSize);
 
-        // 2. 如果只有 1 页，隐藏底部指示器点；多于 1 页则展示并初始化点
+        // 2. 指示器显示控制
         if (pagesData.size() <= 1) {
             mDotContainer.setVisibility(View.GONE);
         } else {
@@ -86,20 +89,24 @@ public class GridPanelBottomDialog<T> extends BaseBottomDialog {
             setupDots(pagesData.size());
         }
 
-        // 3. 使用你的 SimpleAdapter 渲染 ViewPager2 的每一页 (Page)
+        // 3. 渲染 ViewPager2
         SimpleAdapter<List<T>, UikitItemGridPageBinding> pageAdapter = new SimpleAdapter<>(
                 requireContext(),
                 UikitItemGridPageBinding::inflate,
                 (pageBinding, pageList, pageIndex) -> {
-                    // 初始化当前页的 RecyclerView (Grid)
                     RecyclerView rv = pageBinding.rvPageGrid;
                     rv.setLayoutManager(new GridLayoutManager(getContext(), mColumns));
 
-                    // 内层使用 SimpleAdapter 渲染每一个网格 Item
+                    // 内层渲染网格 Item
                     SimpleAdapter<T, UikitItemGridPanelOptionBinding> itemAdapter = new SimpleAdapter<>(
                             requireContext(),
                             UikitItemGridPanelOptionBinding::inflate,
                             (itemBinding, itemData, itemIndex) -> {
+
+                                // 【核心修复点】：在这里统一控制 tv_item_name 的显隐！
+                                itemBinding.tvItemName.setVisibility(mShowItemName ? View.VISIBLE : View.GONE);
+
+                                // 回调给外部设置数据
                                 if (mItemBinder != null) {
                                     mItemBinder.onBind(itemBinding, itemData, itemIndex);
                                 }
@@ -111,7 +118,7 @@ public class GridPanelBottomDialog<T> extends BaseBottomDialog {
                             int globalPosition = pageIndex * pageSize + inPagePosition;
                             mListener.onItemClick(data, globalPosition);
                         }
-                        dismiss(); // 点击选中后关闭弹窗
+                        dismiss();
                     });
 
                     itemAdapter.setList(pageList);
@@ -122,7 +129,6 @@ public class GridPanelBottomDialog<T> extends BaseBottomDialog {
         pageAdapter.setList(pagesData);
         mViewPager.setAdapter(pageAdapter);
 
-        // 4. ViewPager2 滑动联动指示器点
         mViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
@@ -131,7 +137,6 @@ public class GridPanelBottomDialog<T> extends BaseBottomDialog {
         });
     }
 
-    // 按每页大小将 List 切割为多个子 List
     private List<List<T>> partitionList(List<T> list, int pageSize) {
         List<List<T>> pages = new ArrayList<>();
         if (list == null || list.isEmpty()) return pages;
@@ -143,7 +148,6 @@ public class GridPanelBottomDialog<T> extends BaseBottomDialog {
         return pages;
     }
 
-    // 初始化指示器小圆点
     private void setupDots(int count) {
         mDotContainer.removeAllViews();
         for (int i = 0; i < count; i++) {
@@ -157,7 +161,6 @@ public class GridPanelBottomDialog<T> extends BaseBottomDialog {
         updateDots(0);
     }
 
-    // 切换选中的指示器点状态
     private void updateDots(int selectIndex) {
         int count = mDotContainer.getChildCount();
         for (int i = 0; i < count; i++) {
