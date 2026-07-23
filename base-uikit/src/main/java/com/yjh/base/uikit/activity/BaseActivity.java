@@ -47,7 +47,7 @@ public abstract class BaseActivity<VB extends ViewBinding> extends BaseCoreActiv
         ImmersionBar.with(this)
                 .statusBarColor(getStatusBarColor())
                 .statusBarDarkFont(isStatusBarDarkFont())
-                .titleBar(getTitleBarView())
+                .titleBar(getTitleBar())
                 //.fitsSystemWindows(true)
                 .keyboardEnable(true)
                 .init();
