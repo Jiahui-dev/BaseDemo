@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.yjh.base.core.annotation.IntentParam;
 import com.yjh.base.utils.util.LogUtils;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 
 /**
@@ -162,6 +164,17 @@ public class BaseRouter {
 
         public Postcard<T> withFlags(int flags) {
             this.flags = flags;
+            return this;
+        }
+
+        public Postcard<T> withSerializable(String key, Serializable value) {
+            bundle.putSerializable(key, value);
+            return this;
+        }
+
+        // 或者新增：支持传递 Parcelable 序列化对象（如果你的 ProductBean 实现了 Parcelable）
+        public Postcard<T> withParcelable(String key, Parcelable value) {
+            bundle.putParcelable(key, value);
             return this;
         }
 
