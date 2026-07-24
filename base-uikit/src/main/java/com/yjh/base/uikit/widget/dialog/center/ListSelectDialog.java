@@ -23,7 +23,7 @@ public class ListSelectDialog<T> extends BaseDialog {
     /**
      * 定义点击回调接口
      */
-    private interface OnItemClickListener<T> {
+    public interface OnItemClickListener<T> {
         void onItemClick(T item, int position);
     }
 
