@@ -5,7 +5,8 @@
     android:background="@color/uikit_grey_backGround"
     android:gravity="center_horizontal"
     android:orientation="horizontal"
-    android:paddingTop="4dp">
+    android:paddingTop="4dp"
+    android:layout_marginBottom="10dp">
 
     <ProgressBar
         android:id="@+id/pb_loading"
