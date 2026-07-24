@@ -17,6 +17,8 @@ import android.widget.LinearLayout;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
+
 import com.yjh.base.uikit.R;
 import java.util.ArrayList;
 import java.util.List;
@@ -189,21 +191,6 @@ public class TitleBar extends ConstraintLayout {
     }
 
     /**
-     * 设置中间标题
-     * 调用此方法后，会自动隐藏搜索框，变为“标题模式”
-     */
-    public void setTitle(String title) {
-        if (mTvCenterTitle != null) {
-            mTvCenterTitle.setText(title);
-            mTvCenterTitle.setVisibility(VISIBLE);
-        }
-        // 隐藏搜索框
-        if (mSearchGroup != null) {
-            mSearchGroup.setVisibility(GONE);
-        }
-    }
-
-    /**
      * 需要切回搜索模式，可以调这个
      */
     public void showSearchMode() {
@@ -223,11 +210,75 @@ public class TitleBar extends ConstraintLayout {
     }
 
     /**
+     * 设置中间标题（默认居中）
+     */
+    public void setTitle(String title) {
+        setTitle(title, TitleGravity.CENTER);
+    }
+
+    /**
+     * 重载方法：设置标题内容及位置
+     *
+     * @param title   标题文字
+     * @param gravity 标题位置（TitleGravity.LEFT / CENTER / RIGHT）
+     */
+    public void setTitle(String title, TitleGravity gravity) {
+        if (mTvCenterTitle == null) return;
+
+        mTvCenterTitle.setText(title);
+        mTvCenterTitle.setVisibility(VISIBLE);
+
+        // 隐藏搜索框
+        if (mSearchGroup != null) {
+            mSearchGroup.setVisibility(GONE);
+        }
+
+        // 动态调整 ConstraintLayout 约束
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(this);
+
+        int titleId = R.id.tv_center_title;
+
+        switch (gravity) {
+            case LEFT:
+                // 靠左：左边约束到返回键右侧，清除右边约束
+                constraintSet.connect(titleId, ConstraintSet.START, R.id.iv_back, ConstraintSet.END, dp2px(10));
+                constraintSet.clear(titleId, ConstraintSet.END);
+                mTvCenterTitle.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+                break;
+
+            case RIGHT:
+                // 靠右：右边约束到右侧容器左侧，清除左边约束
+                constraintSet.connect(titleId, ConstraintSet.END, R.id.ll_right_custom_container, ConstraintSet.START, dp2px(10));
+                constraintSet.clear(titleId, ConstraintSet.START);
+                mTvCenterTitle.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
+                break;
+
+            case CENTER:
+            default:
+                // 居中：左右同时约束到 parent
+                constraintSet.connect(titleId, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+                constraintSet.connect(titleId, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END);
+                mTvCenterTitle.setGravity(Gravity.CENTER);
+                break;
+        }
+
+        // 应用更新后的约束
+        constraintSet.applyTo(this);
+    }
+
+    /**
      * 修改中间标题的颜色
      */
     public void setTitleColor(int color) {
         if (mTvCenterTitle != null) {
             mTvCenterTitle.setTextColor(color);
         }
+    }
+
+    public enum TitleGravity {
+        LEFT,   // 靠左（紧贴返回按钮右侧）
+        CENTER, // 居中（默认）
+        RIGHT   // 靠右（紧贴右侧自定义 View 容器左侧）
     }
 }
