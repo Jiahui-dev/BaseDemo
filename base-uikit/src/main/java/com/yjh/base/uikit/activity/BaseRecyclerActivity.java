@@ -52,6 +52,10 @@ public abstract class BaseRecyclerActivity<T,VB extends ViewBinding> extends Bas
 
             // 3. 初始化分页
             mLoadMoreController = new LoadMoreController(mRecyclerView, mAdapter);
+            int footerBgRes = setFooterBackgroundColorRes();
+            if (footerBgRes != 0) {
+                mLoadMoreController.setFooterBackgroundColorRes(footerBgRes);
+            }
             if (isSupportLoadMore()) {
                 mLoadMoreController.setOnLoadMoreListener(this::onLoadMore);
                 registerController("loadMore_controller", mLoadMoreController);
@@ -176,6 +180,10 @@ public abstract class BaseRecyclerActivity<T,VB extends ViewBinding> extends Bas
         parent.addView(errorStub, new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         stateController.setErrorViewStub(errorStub);
+    }
+
+    protected int setFooterBackgroundColorRes() {
+        return 0;
     }
 
 }

@@ -30,7 +30,6 @@ public abstract class BaseActivity<VB extends ViewBinding> extends BaseCoreActiv
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // 初始化沉浸式
         initImmersionBar();
     }
 
@@ -39,15 +38,15 @@ public abstract class BaseActivity<VB extends ViewBinding> extends BaseCoreActiv
 
     }
 
-    protected View getTitleBar() { return null; }
-    protected int getStatusBarColor() { return R.color.uikit_grey_backGround; } // 规范资源前缀
+    protected View getTopView() { return null; }
+    protected int getStatusBarColor() { return R.color.uikit_grey_backGround; }
     protected boolean isStatusBarDarkFont() { return true; }
 
     protected void initImmersionBar() {
         ImmersionBar.with(this)
                 .statusBarColor(getStatusBarColor())
                 .statusBarDarkFont(isStatusBarDarkFont())
-                .titleBar(getTitleBar())
+                .titleBar(getTopView())
                 //.fitsSystemWindows(true)
                 .keyboardEnable(true)
                 .init();
@@ -57,7 +56,6 @@ public abstract class BaseActivity<VB extends ViewBinding> extends BaseCoreActiv
     public void showLoading(String msg) {
         if (mLoadingDialog == null) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            // 资源随代码走：uikit_view_dialog_loading.xml 存放在 base-uikit 模块中
             View view = LayoutInflater.from(this).inflate(R.layout.uikit_view_dialog_loading, null);
             mTvLoadingMsg = view.findViewById(R.id.tv_dialogMsg);
             builder.setView(view);

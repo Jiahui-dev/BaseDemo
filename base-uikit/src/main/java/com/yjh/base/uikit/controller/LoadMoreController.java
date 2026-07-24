@@ -162,7 +162,7 @@ public class LoadMoreController implements Lifecycle {
 
         if (mFooterBinding == null) return;
 
-        // 1. 无论是否还有更多，立刻隐藏转圈的 ProgressBar
+        // 无论是否还有更多，立刻隐藏转圈的 ProgressBar
         mFooterBinding.pbLoading.setVisibility(View.GONE);
         mFooterBinding.getRoot().setOnClickListener(null);
 
@@ -170,9 +170,6 @@ public class LoadMoreController implements Lifecycle {
             // 还有更多数据，直接隐藏文字提示，等待下次滑动
             mFooterBinding.tvLoading.setVisibility(View.GONE);
         } else {
-            // 【核心修复】：最后一页到底了
-            // 不要立刻改成“已经到底啦”！先让它保持现状（或者暂时 GONE）
-            // 延迟 150ms 变字，确保 15 条新数据已经完全被渲染并把 Footer 挤到了屏幕下方
             if (mRecyclerView != null) {
                 mRecyclerView.postDelayed(() -> {
                     // 双重校验环境安全
@@ -238,6 +235,33 @@ public class LoadMoreController implements Lifecycle {
     public void retryLoadMore() {
         if (!isLoading) {
             startLoadMore();
+        }
+    }
+
+    /**
+     * 设置 Footer 的背景颜色 (ColorRes，如 R.color.white)
+     */
+    public void setFooterBackgroundColorRes(@androidx.annotation.ColorRes int colorRes) {
+        if (mFooterBinding != null) {
+            mFooterBinding.getRoot().setBackgroundResource(colorRes);
+        }
+    }
+
+    /**
+     * 设置 Footer 的背景颜色 (ColorInt，如 Color.WHITE 或 Color.parseColor("#FFFFFF"))
+     */
+    public void setFooterBackgroundColor(@androidx.annotation.ColorInt int color) {
+        if (mFooterBinding != null) {
+            mFooterBinding.getRoot().setBackgroundColor(color);
+        }
+    }
+
+    /**
+     * 设置 Footer 的背景 Drawable/Resource
+     */
+    public void setFooterBackgroundResource(@androidx.annotation.DrawableRes int resId) {
+        if (mFooterBinding != null) {
+            mFooterBinding.getRoot().setBackgroundResource(resId);
         }
     }
 }
