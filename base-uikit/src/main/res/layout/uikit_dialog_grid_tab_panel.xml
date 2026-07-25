@@ -19,15 +19,22 @@
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_layout"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="36dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="8dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         android:visibility="gone"
-        app:tabIndicatorColor="#333333"
-        app:tabIndicatorFullWidth="false"
-        app:tabIndicatorHeight="3dp"
+        app:tabBackground="@android:color/transparent"
+        app:tabIndicator="@drawable/uikit_bg_tab_indicator"
+        app:tabIndicatorColor="@null"
+        app:tabIndicatorGravity="stretch"
         app:tabMode="scrollable"
+        app:tabPaddingEnd="16dp"
+        app:tabPaddingStart="16dp"
         app:tabRippleColor="@android:color/transparent"
         app:tabSelectedTextColor="#333333"
-        app:tabTextColor="#999999" />
+        app:tabTextColor="#80333333" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_content"

@@ -56,7 +56,7 @@ public class GridPanelBottomDialog<T> extends BaseBottomDialog {
     }
 
     /**
-     * 设置是否显示每个图标下方的文字（tv_item_name）
+     * 设置是否显示每个图标下方的文字
      */
     public GridPanelBottomDialog<T> showTitle(boolean show) {
         this.mShowItemName = show;
