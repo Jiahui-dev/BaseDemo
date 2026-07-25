@@ -2,16 +2,13 @@ package com.yjh.base.uikit.widget.dialog.bottom;
 
 import android.view.View;
 import android.widget.LinearLayout;
-
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
-
 import com.yjh.base.uikit.R;
 import com.yjh.base.uikit.adapter.SimpleAdapter;
 import com.yjh.base.uikit.databinding.UikitItemGridPageBinding;
 import com.yjh.base.uikit.databinding.UikitItemGridPanelOptionBinding;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,7 +100,6 @@ public class GridPanelBottomDialog<T> extends BaseBottomDialog {
                             UikitItemGridPanelOptionBinding::inflate,
                             (itemBinding, itemData, itemIndex) -> {
 
-                                // 【核心修复点】：在这里统一控制 tv_item_name 的显隐！
                                 itemBinding.tvItemName.setVisibility(mShowItemName ? View.VISIBLE : View.GONE);
 
                                 // 回调给外部设置数据
