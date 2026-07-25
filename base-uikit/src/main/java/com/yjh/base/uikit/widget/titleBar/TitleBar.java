@@ -228,43 +228,42 @@ public class TitleBar extends ConstraintLayout {
         mTvCenterTitle.setText(title);
         mTvCenterTitle.setVisibility(VISIBLE);
 
-        // 隐藏搜索框
         if (mSearchGroup != null) {
             mSearchGroup.setVisibility(GONE);
         }
 
-        // 动态调整 ConstraintLayout 约束
-        ConstraintSet constraintSet = new ConstraintSet();
-        constraintSet.clone(this);
+        // 获取已有的 LayoutParams
+        ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) mTvCenterTitle.getLayoutParams();
 
-        int titleId = R.id.tv_center_title;
+        // 重置横向约束
+        lp.startToStart = ConstraintLayout.LayoutParams.UNSET;
+        lp.startToEnd = ConstraintLayout.LayoutParams.UNSET;
+        lp.endToEnd = ConstraintLayout.LayoutParams.UNSET;
+        lp.endToStart = ConstraintLayout.LayoutParams.UNSET;
 
+        // 根据 gravity 重新绑定约束
         switch (gravity) {
             case LEFT:
-                // 靠左：左边约束到返回键右侧，清除右边约束
-                constraintSet.connect(titleId, ConstraintSet.START, R.id.iv_back, ConstraintSet.END, dp2px(10));
-                constraintSet.clear(titleId, ConstraintSet.END);
+                lp.startToEnd = R.id.iv_back;
+                lp.leftMargin = dp2px(10);
                 mTvCenterTitle.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
                 break;
 
             case RIGHT:
-                // 靠右：右边约束到右侧容器左侧，清除左边约束
-                constraintSet.connect(titleId, ConstraintSet.END, R.id.ll_right_custom_container, ConstraintSet.START, dp2px(10));
-                constraintSet.clear(titleId, ConstraintSet.START);
+                lp.endToStart = R.id.ll_right_custom_container;
+                lp.rightMargin = dp2px(10);
                 mTvCenterTitle.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
                 break;
 
             case CENTER:
             default:
-                // 居中：左右同时约束到 parent
-                constraintSet.connect(titleId, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
-                constraintSet.connect(titleId, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END);
+                lp.startToStart = ConstraintLayout.LayoutParams.PARENT_ID;
+                lp.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID;
                 mTvCenterTitle.setGravity(Gravity.CENTER);
                 break;
         }
 
-        // 应用更新后的约束
-        constraintSet.applyTo(this);
+        mTvCenterTitle.setLayoutParams(lp);
     }
 
     /**
@@ -277,7 +276,7 @@ public class TitleBar extends ConstraintLayout {
     }
 
     public enum TitleGravity {
-        LEFT,   // 靠左（紧贴返回按钮右侧）
+        LEFT,   // 靠左
         CENTER, // 居中（默认）
         RIGHT   // 靠右（紧贴右侧自定义 View 容器左侧）
     }
