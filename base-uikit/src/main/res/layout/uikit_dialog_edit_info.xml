@@ -35,7 +35,7 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_gray_round_8"
+            android:background="@drawable/uikit_bg_gray_radius_08"
             android:paddingHorizontal="15dp"
             android:paddingVertical="5dp">
 
@@ -71,7 +71,7 @@
         android:layout_height="48dp"
         android:layout_marginHorizontal="20dp"
         android:layout_marginTop="40dp"
-        android:background="@drawable/bg_btn_yellow"
+        android:background="@drawable/uikit_bg_yellow_radius25"
         android:text="确 定"
         android:textColor="#333333"
         android:textSize="16sp"
