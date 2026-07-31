@@ -3,6 +3,8 @@ package com.yjh.base.uikit.activity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.widget.FrameLayout;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
@@ -111,7 +113,6 @@ public abstract class BaseRecyclerActivity<T,VB extends ViewBinding> extends Bas
         if (mStateController != null) mStateController.handleData(list);
 
         if (mLoadMoreController != null) {
-            // 健壮性修复：如果第一页数据为空，或者数量特别少（比如少于10条），直接判定为没有更多，避免滑不动还显示加载
             boolean hasMore = isSupportLoadMore() && list != null && list.size() >= getPageSize();
             mLoadMoreController.updateLoadingState(hasMore, getEndFooterText());
         }
@@ -163,22 +164,44 @@ public abstract class BaseRecyclerActivity<T,VB extends ViewBinding> extends Bas
     private void initStatusViews(StateController stateController) {
         if (mRecyclerView == null || mRecyclerView.getParent() == null) return;
 
-        ViewGroup parent = (ViewGroup) mRecyclerView.getParent();
+        ViewGroup oldParent = (ViewGroup) mRecyclerView.getParent();
+        int childIndex = oldParent.indexOfChild(mRecyclerView);
+        ViewGroup.LayoutParams oldParams = mRecyclerView.getLayoutParams();
 
-        // 动态创建空状态 ViewStub 并添加到父布局中
+        // 1. 创建一个通用的容器，充当保护罩
+        FrameLayout wrapperContainer = new FrameLayout(this);
+        // 设置保底高度 (260dp)，确保列表为空时缺省页有足够的展示空间，且能在卡片内居中
+        int minHeightPx = (int) (260 * getResources().getDisplayMetrics().density);
+        wrapperContainer.setMinimumHeight(minHeightPx);
+
+        // 2. 将 RecyclerView 从原父容器中移除，移入 wrapperContainer
+        oldParent.removeView(mRecyclerView);
+        FrameLayout.LayoutParams rvParams = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        wrapperContainer.addView(mRecyclerView, rvParams);
+
+        // 3. 动态创建缺省页 ViewStub 放入 wrapperContainer
         ViewStub emptyStub = new ViewStub(this);
-        // R.layout.uikit_view_state_empty 为你底层 common/uikit 模块里的通用标准空布局
         emptyStub.setLayoutResource(R.layout.uikit_view_state_empty);
-        parent.addView(emptyStub, new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        stateController.setEmptyViewStub(emptyStub);
 
-        // 动态创建错误状态 ViewStub 并添加到父布局中
         ViewStub errorStub = new ViewStub(this);
-        // R.layout.uikit_view_state_error 为你底层的通用标准错误布局
         errorStub.setLayoutResource(R.layout.uikit_view_state_error);
-        parent.addView(errorStub, new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        FrameLayout.LayoutParams stubParams = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        );
+
+        wrapperContainer.addView(emptyStub, stubParams);
+        wrapperContainer.addView(errorStub, stubParams);
+
+        // 4. 把包装好的 wrapperContainer 插回原父容器的对应位置
+        oldParent.addView(wrapperContainer, childIndex, oldParams);
+
+        // 5. 将 ViewStub 注册给 StateController
+        stateController.setEmptyViewStub(emptyStub);
         stateController.setErrorViewStub(errorStub);
     }
 
