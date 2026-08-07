@@ -20,6 +20,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.yjh.base.uikit.R;
+import com.yjh.base.utils.util.LogUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +30,7 @@ import java.util.List;
  */
 public class TitleBar extends ConstraintLayout {
 
+    private static final String TAG="TitleBar";
     private ImageView mIvBack;
     private LinearLayout mRightContainer;
     private TextSwitcher mTextSwitcher;
@@ -92,6 +95,9 @@ public class TitleBar extends ConstraintLayout {
      * 由子类或外部调用，注入搜索关键词数据
      */
     public void setSearchHints(List<String> hints) {
+
+        LogUtils.verbose(TAG, "setSearchHints: hints=" + hints);
+
         if (hints == null || hints.isEmpty()) return;
 
         this.mHintList = hints;
@@ -129,6 +135,7 @@ public class TitleBar extends ConstraintLayout {
             //targetParams.gravity = Gravity.CENTER_VERTICAL;
 
             mRightContainer.addView(view, targetParams);
+            LogUtils.verbose(TAG, "addRightView: view added");
         }
     }
 

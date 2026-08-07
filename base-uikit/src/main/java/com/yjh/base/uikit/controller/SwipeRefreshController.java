@@ -3,8 +3,9 @@ package com.yjh.base.uikit.controller;
 import android.app.Activity;
 import android.view.View;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.yjh.base.uikit.listener.IRefreshListener;
 import com.yjh.base.utils.util.LogUtils;
 import com.yjh.base.core.lifecycle.Lifecycle;
 import com.yjh.base.core.lifecycle.LifecycleEvent;
