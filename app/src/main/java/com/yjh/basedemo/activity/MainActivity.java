@@ -5,7 +5,7 @@ import android.view.View;
 import androidx.recyclerview.widget.RecyclerView;
 import com.yjh.base.uikit.activity.BaseRecyclerActivity;
 import com.yjh.base.uikit.adapter.SimpleAdapter;
-import com.yjh.base.uikit.controller.IRefreshListener;
+import com.yjh.base.uikit.listener.IRefreshListener;
 import com.yjh.basedemo.databinding.AcMyCollectionBinding;
 import com.yjh.basedemo.databinding.ItemCollectionBinding;
 import com.yjh.basedemo.model.bean.CollectionBean;

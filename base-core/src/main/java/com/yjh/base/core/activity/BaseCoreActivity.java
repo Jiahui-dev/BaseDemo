@@ -73,6 +73,12 @@ public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompat
 
     }
 
+    protected <T extends Lifecycle> void registerController(Class<T> clazz, T controller) {
+        if (clazz != null) {
+            registerController(clazz.getName(), controller);
+        }
+    }
+
     /**
      * 供子类调用：往插排上“插插件”
      */
@@ -88,6 +94,15 @@ public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompat
     @SuppressWarnings("unchecked")
     protected <T extends Lifecycle> T getController(String key) {
         return (T) mControllers.get(key);
+    }
+
+    /**
+     * 供子类调用：根据 Class 拿到具体的插件实例
+     */
+    @SuppressWarnings("unchecked")
+    protected <T extends Lifecycle> T getController(Class<T> clazz) {
+        if (clazz == null) return null;
+        return (T) getController(clazz.getName());
     }
 
     /**

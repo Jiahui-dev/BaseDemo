@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 import com.yjh.base.uikit.R;
 import com.yjh.base.uikit.adapter.SimpleAdapter;
-import com.yjh.base.uikit.controller.IRefreshListener;
+import com.yjh.base.uikit.listener.IRefreshListener;
 import com.yjh.base.uikit.controller.LoadMoreController;
 import com.yjh.base.uikit.controller.StateController;
 import com.yjh.base.uikit.controller.SwipeRefreshController;

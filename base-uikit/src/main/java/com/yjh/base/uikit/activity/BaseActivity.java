@@ -80,7 +80,7 @@ public abstract class BaseActivity<VB extends ViewBinding> extends BaseCoreActiv
 
     @Override
     public void showError(String msg) {
-        ToastUtils.show(this, msg);
+        ToastUtils.showShort(msg);
     }
 
     @Override

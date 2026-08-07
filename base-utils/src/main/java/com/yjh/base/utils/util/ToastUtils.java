@@ -1,92 +1,88 @@
 package com.yjh.base.utils.util;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
-import android.view.View;
+import android.os.Looper;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 /**
- * Created by jiahui on 2025/12/15
+ * Created by jiahui
  */
 public class ToastUtils {
 
-    private Context mContext = null;
-    private Toast mToast = null;
-    private Handler mHandler = null;
-    private int duration = 0;
-    private int currDuration = 0;
-    private final int DEFAULT = 2000;
-    private Runnable mToastThread = new Runnable() {
+    private static Context sContext;
+    private static Toast sToast;
+    private static final Handler MAIN_HANDLER = new Handler(Looper.getMainLooper());
 
-        public void run() {
-            mToast.show();
-            mHandler.postDelayed(mToastThread, DEFAULT);// 每隔2秒显示一次
-            if (duration != 0) {
-                if (currDuration <= duration) {
-                    currDuration += DEFAULT;
-                } else {
-                    cancel();
-                }
-            }
+    private ToastUtils() {
+        throw new UnsupportedOperationException("u can't instantiate me...");
+    }
 
-        }
-    };
-
-    public ToastUtils(Context context) {
-        mContext = context;
-        currDuration = DEFAULT;
-        if (mContext != null) {
-            mHandler = new Handler(mContext.getMainLooper());
-            mToast = Toast.makeText(mContext, "", Toast.LENGTH_LONG);
+    /**
+     * 必须在 Application 初始化时调用一次
+     */
+    public static void init(Context context) {
+        if (context != null) {
+            sContext = context.getApplicationContext();
         }
     }
 
-    public static void show(Context context, String text, int duration) {
-        final ToastUtils toastUtils = new ToastUtils(context);
-        toastUtils.setText(text);
-        toastUtils.show(duration);
+    /**
+     * 短时间显示
+     */
+    public static void showShort(final String message) {
+        show(message, Toast.LENGTH_SHORT);
     }
 
-    public static void show(Context context, String text) {
-        final ToastUtils toastUtils = new ToastUtils(context);
-        toastUtils.setText(text);
-        toastUtils.show(2000);
+    public static void showShort(final int resId) {
+        if (sContext != null) {
+            show(sContext.getString(resId), Toast.LENGTH_SHORT);
+        }
     }
 
-    public static void show(Context context, int resId) {
-        final ToastUtils toastUtils = new ToastUtils(context);
-        toastUtils.setText(context.getString(resId));
-        toastUtils.show(2000);
+    /**
+     * 长时间显示
+     */
+    public static void showLong(final String message) {
+        show(message, Toast.LENGTH_LONG);
     }
 
-    public void setText(String text) {
-        if (mToast != null)
-            mToast.setText(text);
+    public static void showLong(final int resId) {
+        if (sContext != null) {
+            show(sContext.getString(resId), Toast.LENGTH_LONG);
+        }
     }
 
-    public void show(int duration) {
-        this.duration = duration;
-        if (mToast != null)
-            mHandler.post(mToastThread);
+    /**
+     * 核心显示方法（兼容子线程调用 + 防重复弹窗）
+     */
+    private static void show(final String message, final int duration) {
+        if (TextUtils.isEmpty(message)) {
+            return;
+        }
+
+        // 如果在子线程，自动 post 到主线程去弹 Toast
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            MAIN_HANDLER.post(() -> showInternal(message, duration));
+        } else {
+            showInternal(message, duration);
+        }
     }
 
-    public void setGravity(int gravity, int xOffset, int yOffset) {
-        mToast.setGravity(gravity, xOffset, yOffset);
+    @SuppressLint("ShowToast")
+    private static void showInternal(String message, int duration) {
+        if (sContext == null) {
+            return;
+        }
+
+        // 如果当前已有 Toast，先取消掉，实现立即覆盖更新文本的效果，防排队
+        if (sToast != null) {
+            sToast.cancel();
+        }
+
+        sToast = Toast.makeText(sContext, message, duration);
+        sToast.show();
     }
-
-    public void setDuration(int duration) {
-        mToast.setDuration(duration);
-    }
-
-    public void setView(View view) {
-        mToast.setView(view);
-    }
-
-    public void cancel() {
-        mHandler.removeCallbacks(mToastThread);// 先把显示线程删除
-        mToast.cancel();// 把最后一个线程的显示效果cancel掉，就一了百了了
-        currDuration = DEFAULT;
-    }
-
-
 }

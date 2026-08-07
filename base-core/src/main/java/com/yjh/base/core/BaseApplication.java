@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 
+import com.yjh.base.utils.util.ToastUtils;
+
 /**
  * Created by jiahui on 2025/12/16
  */
@@ -21,6 +23,7 @@ public class BaseApplication extends Application {
         super.onCreate();
         context = getApplicationContext();
         instance = this;
+        ToastUtils.init(this);
     }
 
     public static Context getAppContext() {

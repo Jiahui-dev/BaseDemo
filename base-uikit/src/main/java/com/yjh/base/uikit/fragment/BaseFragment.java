@@ -84,7 +84,7 @@ public abstract class BaseFragment<VB extends ViewBinding> extends BaseCoreFragm
 
     @Override
     public void showError(String msg) {
-        ToastUtils.show(mActivity, msg);
+        ToastUtils.showShort(msg);
     }
 
     @Override
