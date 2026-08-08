@@ -66,7 +66,10 @@ public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompat
         // 此时 Controller 内部的 case ON_VIEW_CREATED 绝对可以安全地拿到各个控件！
         dispatchLifecycleEvent(LifecycleEvent.ON_VIEW_CREATED);
 
+        // 专门处理本地控件点击事件
         initListener();
+        // 专门处理全局、跨组件消息
+        initEvent();
         initData();
         // 驱动状态机：数据流就绪
         dispatchLifecycleEvent(LifecycleEvent.ON_DATA_INIT);
@@ -128,6 +131,9 @@ public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompat
     }
 
     protected void initListener() {
+    }
+
+    protected void initEvent(){
     }
 
     protected void initData() {

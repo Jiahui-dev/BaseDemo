@@ -76,7 +76,7 @@ public class SimpleAdapter<T, VB extends ViewBinding> extends RecyclerView.Adapt
             }
         });
 
-        // 【平铺赋值核心】强转为内容区域的具体 ViewBinding 并回调出去
+        // 强转为内容区域的具体 ViewBinding 并回调出去
         if (mBinder != null) {
             mBinder.bind((VB) holder.binding, item, position);
         }
