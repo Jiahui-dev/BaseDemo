@@ -23,7 +23,6 @@ public class BaseApplication extends Application {
         super.onCreate();
         context = getApplicationContext();
         instance = this;
-        ToastUtils.init(this);
     }
 
     public static Context getAppContext() {
