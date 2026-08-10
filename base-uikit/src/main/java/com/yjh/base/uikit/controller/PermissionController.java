@@ -27,7 +27,6 @@ public class PermissionController implements Lifecycle {
 
     public interface OnPermissionCallback {
         void onGranted();
-
         void onDenied(List<String> deniedPermissions);
     }
 

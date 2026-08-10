@@ -18,7 +18,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * <p>
  * 特性：
  * 0 内存泄漏：基于 Controller 插槽与 BaseCore 生命周期绑定，自动解绑。
- * 0 数据倒灌：纯即时响应模式，专为跨组件/跨页面事件通信而生。
+ * 0 数据倒灌：纯即时响应模式。
  * 线程安全：底层采用 ConcurrentHashMap + CopyOnWriteArrayList。
  * 主线程调度：支持在任意子线程 post，观察者回调统一安全的切回主线程执行。
  * 异常隔离：单个 Observer 执行报错不会中断其他 Observer，更不会引发 App 崩溃。
