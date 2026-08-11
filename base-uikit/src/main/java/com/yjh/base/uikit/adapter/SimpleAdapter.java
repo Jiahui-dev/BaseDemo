@@ -124,18 +124,20 @@ public class SimpleAdapter<T, VB extends ViewBinding> extends RecyclerView.Adapt
     /**
      * 刷新并重置整个列表数据
      */
-    public void setList(List<T> list) {
-        this.mList = list == null ? new ArrayList<>() : list;
+    @SuppressWarnings("unchecked")
+    public void setList(List<?> list) {
+        this.mList = list == null ? new ArrayList<>() : (List<T>) list;
         notifyDataSetChanged();
     }
 
     /**
      * 往列表末尾追加分页数据
      */
-    public void addList(List<T> list) {
+    @SuppressWarnings("unchecked")
+    public void addList(List<?> list) {
         if (list != null && !list.isEmpty()) {
             int startPos = mList.size();
-            this.mList.addAll(list);
+            this.mList.addAll((List<T>) list);
             notifyItemRangeInserted(startPos, list.size());
         }
     }

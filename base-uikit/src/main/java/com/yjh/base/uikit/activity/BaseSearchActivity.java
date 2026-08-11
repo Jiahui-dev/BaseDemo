@@ -52,12 +52,9 @@ public abstract class BaseSearchActivity<T> extends BaseRecyclerActivity<T, Uiki
 
     @Override
     protected boolean initStatusViewStub(StateController stateController) {
-        if (uikitAcBaseSearchBinding.emptyStub != null && uikitAcBaseSearchBinding.errorStub != null) {
-            stateController.setEmptyViewStub(uikitAcBaseSearchBinding.emptyStub);
-            stateController.setErrorViewStub(uikitAcBaseSearchBinding.errorStub);
-            return true;
-        }
-        return false;
+        stateController.setEmptyViewStub(uikitAcBaseSearchBinding.emptyStub);
+        stateController.setErrorViewStub(uikitAcBaseSearchBinding.errorStub);
+        return true;
     }
 
     @Override

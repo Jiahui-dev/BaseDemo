@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.yjh.base.uikit.R;
 import com.yjh.base.uikit.adapter.SimpleAdapter;
-import com.yjh.base.uikit.databinding.UnkitItemSimpleTextBinding;
+import com.yjh.base.uikit.databinding.UikitItemSimpleTextBinding;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,9 +73,9 @@ public class ListSelectDialog<T> extends BaseDialog {
         rvList.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // 直接实例化 SimpleAdapter，传入 Creator 和 Binder
-        SimpleAdapter<T, UnkitItemSimpleTextBinding> adapter = new SimpleAdapter<>(
+        SimpleAdapter<T, UikitItemSimpleTextBinding> adapter = new SimpleAdapter<>(
                 getContext(),
-                UnkitItemSimpleTextBinding::inflate, // 传入条目 ViewBinding 的渲染器
+                UikitItemSimpleTextBinding::inflate, // 传入条目 ViewBinding 的渲染器
                 (binding, data, position) -> {
                     String showText = (mConverter != null) ? mConverter.convert(data) : data.toString();
 

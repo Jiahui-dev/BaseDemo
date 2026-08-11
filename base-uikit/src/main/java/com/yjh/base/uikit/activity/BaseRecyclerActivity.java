@@ -30,6 +30,14 @@ public abstract class BaseRecyclerActivity<T,VB extends ViewBinding> extends Bas
     protected SwipeRefreshController mRefreshController;
     private int mDefaultSpace = 16;
 
+    public RecyclerView getRecyclerView() {
+        return mRecyclerView;
+    }
+
+    public SimpleAdapter<T, ? extends ViewBinding> getAdapter() {
+        return mAdapter;
+    }
+
     @Override
     protected void initView() {
         super.initView();
