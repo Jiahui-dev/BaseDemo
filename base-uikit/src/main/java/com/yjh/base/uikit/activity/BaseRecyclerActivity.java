@@ -10,8 +10,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 import com.yjh.base.uikit.R;
 import com.yjh.base.uikit.adapter.SimpleAdapter;
+import com.yjh.base.uikit.controller.PagingController;
 import com.yjh.base.uikit.listener.IRefreshListener;
-import com.yjh.base.uikit.controller.LoadMoreController;
 import com.yjh.base.uikit.controller.StateController;
 import com.yjh.base.uikit.controller.SwipeRefreshController;
 import com.yjh.base.uikit.decoration.SpaceItemDecoration;
@@ -21,12 +21,13 @@ import java.util.List;
  * 在 BaseActivity 基础上增加了 Controller 和一些抽象方法
  * Created by jiahui on 2026/07/14
  */
-public abstract class BaseRecyclerActivity<T,VB extends ViewBinding> extends BaseActivity<VB> {
+public abstract class BaseRecyclerActivity<T,VB extends ViewBinding> extends BaseActivity<VB>
+        implements PagingController.OnPagingListener{
 
     protected RecyclerView mRecyclerView;
     protected SimpleAdapter<T, ? extends ViewBinding> mAdapter;
     protected StateController mStateController;
-    protected LoadMoreController mLoadMoreController;
+    protected PagingController mPagingController;
     protected SwipeRefreshController mRefreshController;
     private int mDefaultSpace = 16;
 
@@ -36,6 +37,10 @@ public abstract class BaseRecyclerActivity<T,VB extends ViewBinding> extends Bas
 
     public SimpleAdapter<T, ? extends ViewBinding> getAdapter() {
         return mAdapter;
+    }
+
+    public PagingController getPagingController() {
+        return mPagingController;
     }
 
     @Override
@@ -56,19 +61,57 @@ public abstract class BaseRecyclerActivity<T,VB extends ViewBinding> extends Bas
             mStateController = new StateController(this, mRecyclerView);
             // 优先尝试子类的定制 ViewStub，如果没有，基类动态注入全局默认兜底
             if (!initStatusViewStub(mStateController)) {
-                initStatusViews(mStateController);
+                if (mRecyclerView == null || mRecyclerView.getParent() == null) return;
+
+                ViewGroup oldParent = (ViewGroup) mRecyclerView.getParent();
+                int childIndex = oldParent.indexOfChild(mRecyclerView);
+                ViewGroup.LayoutParams oldParams = mRecyclerView.getLayoutParams();
+
+                // 1. 创建一个通用的容器，充当保护罩
+                FrameLayout wrapperContainer = new FrameLayout(this);
+                // 设置保底高度 (260dp)，确保列表为空时缺省页有足够的展示空间，且能在卡片内居中
+                int minHeightPx = (int) (260 * getResources().getDisplayMetrics().density);
+                wrapperContainer.setMinimumHeight(minHeightPx);
+
+                // 2. 将 RecyclerView 从原父容器中移除，移入 wrapperContainer
+                oldParent.removeView(mRecyclerView);
+                FrameLayout.LayoutParams rvParams = new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                );
+                wrapperContainer.addView(mRecyclerView, rvParams);
+
+                // 3. 动态创建缺省页 ViewStub 放入 wrapperContainer
+                ViewStub emptyStub = new ViewStub(this);
+                emptyStub.setLayoutResource(R.layout.uikit_view_state_empty);
+
+                ViewStub errorStub = new ViewStub(this);
+                errorStub.setLayoutResource(R.layout.uikit_view_state_error);
+
+                FrameLayout.LayoutParams stubParams = new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                );
+
+                wrapperContainer.addView(emptyStub, stubParams);
+                wrapperContainer.addView(errorStub, stubParams);
+
+                // 4. 把包装好的 wrapperContainer 插回原父容器的对应位置
+                oldParent.addView(wrapperContainer, childIndex, oldParams);
+
+                // 5. 将 ViewStub 注册给 StateController
+                mStateController.setEmptyViewStub(emptyStub);
+                mStateController.setErrorViewStub(errorStub);
             }
             registerController("state_controller", mStateController);
 
             // 3. 初始化分页
-            mLoadMoreController = new LoadMoreController(mRecyclerView, mAdapter);
+            mPagingController = new PagingController(this, this);
             int footerBgRes = setFooterBackgroundColorRes();
             if (footerBgRes != 0) {
-                mLoadMoreController.setFooterBackgroundColorRes(footerBgRes);
-            }
-            if (isSupportLoadMore()) {
-                mLoadMoreController.setOnLoadMoreListener(this::onLoadMore);
-                registerController("loadMore_controller", mLoadMoreController);
+                mPagingController.setFooterBackgroundColorRes(footerBgRes);
+                mPagingController.setFooterBackgroundColorRes(footerBgRes);
+                registerController("loadMore_controller", mPagingController);
             }
         }
     }
@@ -85,6 +128,57 @@ public abstract class BaseRecyclerActivity<T,VB extends ViewBinding> extends Bas
             }
             registerController("refresh_controller", mRefreshController);
         }
+    }
+
+    public void refreshListSuccess(List<T> list) {
+        refreshComplete();
+        if (mPagingController != null) {
+            mPagingController.refreshSuccess(list);
+        } else if (mAdapter != null) {
+            mAdapter.setList(list);
+        }
+
+        if (mStateController != null) {
+            mStateController.handleData(list);
+        }
+    }
+
+    public void refreshListFailed(String msg) {
+        refreshComplete();
+        if (mAdapter == null || mAdapter.getItemCount() == 0) {
+            if (mStateController != null) mStateController.showError();
+        } else {
+            showError(msg);
+        }
+    }
+
+    public void loadMoreSuccess(List<T> list, boolean hasMore) {
+        if (mPagingController != null) {
+            mPagingController.loadMoreSuccess(list);
+        } else if (mAdapter != null) {
+            mAdapter.addList(list);
+        }
+    }
+
+    public void loadMoreFailed() {
+        if (mPagingController != null) {
+            mPagingController.loadMoreFailed();
+        }
+    }
+
+    @Override
+    public int getPageSize() {
+        return 15;
+    }
+
+    @Override
+    public String getEndFooterText() {
+        return PagingController.OnPagingListener.super.getEndFooterText();
+    }
+
+    @Override
+    public void onLoadMore(int page, int pageSize) {
+
     }
 
     /**
@@ -105,116 +199,26 @@ public abstract class BaseRecyclerActivity<T,VB extends ViewBinding> extends Bas
         return false;
     }
 
-    public void onLoadMore() {}
+    protected RecyclerView.LayoutManager getLayoutManager() { return new LinearLayoutManager(this); }
+
+    protected boolean shouldAddDefaultSpaceDecoration() { return true; }
 
     public void autoRefresh() {
         if (mRefreshController != null) mRefreshController.autoRefresh();
     }
 
+    public void showContent() { if (mStateController != null) mStateController.showContent(); }
+
     public void refreshComplete() {
         if (mRefreshController != null) mRefreshController.finishRefresh();
     }
 
-    public void refreshListSuccess(List<T> list) {
-        refreshComplete();
-        if (mAdapter != null) mAdapter.setList(list);
-        if (mStateController != null) mStateController.handleData(list);
-
-        if (mLoadMoreController != null) {
-            boolean hasMore = isSupportLoadMore() && list != null && list.size() >= getPageSize();
-            mLoadMoreController.updateLoadingState(hasMore, getEndFooterText());
-        }
-    }
-
-    protected int getPageSize() {
-        return 15;
-    }
-
-    public void refreshListFailed(String msg) {
-        refreshComplete();
-        if (mAdapter == null || mAdapter.getItemCount() == 0) {
-            if (mStateController != null) mStateController.showError();
-        } else {
-            if (mLoadMoreController != null) {
-                mLoadMoreController.loadMoreFail();
-            } else {
-                showError(msg);
-            }
-        }
-    }
-
-    public void loadMoreSuccess(List<T> list, boolean hasMore) {
-        if (mLoadMoreController != null) {
-            mLoadMoreController.loadMoreSuccess(hasMore);
-        }
-        if (mAdapter != null) {
-            mAdapter.addList(list);
-        }
-    }
-
-    public void loadMoreFailed() {
-        if (mLoadMoreController != null) mLoadMoreController.loadMoreFail();
-    }
-
-    protected RecyclerView.LayoutManager getLayoutManager() { return new LinearLayoutManager(this); }
-
-    protected String getEndFooterText() { return "已经到底啦"; }
-
-    protected boolean shouldAddDefaultSpaceDecoration() { return true; }
-
-    protected boolean isSupportLoadMore() { return true; }
-
-    public void showContent() { if (mStateController != null) mStateController.showContent(); }
-
-    /**
-     * 动态注入全局默认的缺省页兜底
-     */
-    private void initStatusViews(StateController stateController) {
-        if (mRecyclerView == null || mRecyclerView.getParent() == null) return;
-
-        ViewGroup oldParent = (ViewGroup) mRecyclerView.getParent();
-        int childIndex = oldParent.indexOfChild(mRecyclerView);
-        ViewGroup.LayoutParams oldParams = mRecyclerView.getLayoutParams();
-
-        // 1. 创建一个通用的容器，充当保护罩
-        FrameLayout wrapperContainer = new FrameLayout(this);
-        // 设置保底高度 (260dp)，确保列表为空时缺省页有足够的展示空间，且能在卡片内居中
-        int minHeightPx = (int) (260 * getResources().getDisplayMetrics().density);
-        wrapperContainer.setMinimumHeight(minHeightPx);
-
-        // 2. 将 RecyclerView 从原父容器中移除，移入 wrapperContainer
-        oldParent.removeView(mRecyclerView);
-        FrameLayout.LayoutParams rvParams = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-        );
-        wrapperContainer.addView(mRecyclerView, rvParams);
-
-        // 3. 动态创建缺省页 ViewStub 放入 wrapperContainer
-        ViewStub emptyStub = new ViewStub(this);
-        emptyStub.setLayoutResource(R.layout.uikit_view_state_empty);
-
-        ViewStub errorStub = new ViewStub(this);
-        errorStub.setLayoutResource(R.layout.uikit_view_state_error);
-
-        FrameLayout.LayoutParams stubParams = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-        );
-
-        wrapperContainer.addView(emptyStub, stubParams);
-        wrapperContainer.addView(errorStub, stubParams);
-
-        // 4. 把包装好的 wrapperContainer 插回原父容器的对应位置
-        oldParent.addView(wrapperContainer, childIndex, oldParams);
-
-        // 5. 将 ViewStub 注册给 StateController
-        stateController.setEmptyViewStub(emptyStub);
-        stateController.setErrorViewStub(errorStub);
-    }
-
     protected int setFooterBackgroundColorRes() {
         return 0;
+    }
+
+    protected boolean isSupportPaging(){
+        return false;
     }
 
 }

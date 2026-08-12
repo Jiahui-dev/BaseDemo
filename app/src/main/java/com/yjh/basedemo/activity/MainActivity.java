@@ -65,7 +65,7 @@ public class MainActivity extends BaseRecyclerActivity<CollectionBean, AcMyColle
     }
 
     @Override
-    public void onLoadMore() {
+    public void onLoadMore(int page, int pageSize) {
         mCurrentPage++;
         // 模拟请求分页网络接口
         requestCollectionData(mCurrentPage);

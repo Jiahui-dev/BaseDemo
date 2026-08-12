@@ -166,7 +166,7 @@ public abstract class BaseSearchActivity<T> extends BaseRecyclerActivity<T, Uiki
     }
 
     @Override
-    public void onLoadMore() {
+    public void onLoadMore(int page, int pageSize) {
         if (TextUtils.isEmpty(mCurrentKeyword)) {
             loadMoreFailed();
             return;
