@@ -51,13 +51,6 @@ public abstract class BaseSearchActivity<T> extends BaseRecyclerActivity<T, Uiki
     }
 
     @Override
-    protected boolean initStatusViewStub(StateController stateController) {
-        stateController.setEmptyViewStub(uikitAcBaseSearchBinding.emptyStub);
-        stateController.setErrorViewStub(uikitAcBaseSearchBinding.errorStub);
-        return true;
-    }
-
-    @Override
     public void initView() {
         super.initView();
 
@@ -159,14 +152,14 @@ public abstract class BaseSearchActivity<T> extends BaseRecyclerActivity<T, Uiki
     @Override
     public void onRefresh() {
         if (TextUtils.isEmpty(mCurrentKeyword)) {
-            refreshComplete();
+            finishRefresh();
             return;
         }
         doSearch(mCurrentKeyword);
     }
 
     @Override
-    public void onLoadMore(int page, int pageSize) {
+    public void onLoadMore() {
         if (TextUtils.isEmpty(mCurrentKeyword)) {
             loadMoreFailed();
             return;

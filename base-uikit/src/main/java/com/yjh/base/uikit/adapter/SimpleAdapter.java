@@ -67,6 +67,8 @@ public class SimpleAdapter<T, VB extends ViewBinding> extends RecyclerView.Adapt
             return; // Footer 布局通常为静态的加载状态提示，不需要绑定动态列表数据
         }
 
+        android.util.Log.d("DEBUG_RECYCLER", "【4.渲染条目】onBindViewHolder 正在绘制第 " + position + " 项数据");
+
         final T item = mList.get(position);
 
         // 设置全行点击事件

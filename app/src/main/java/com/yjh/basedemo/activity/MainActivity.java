@@ -14,7 +14,7 @@ import java.util.List;
 
 public class MainActivity extends BaseRecyclerActivity<CollectionBean, AcMyCollectionBinding> implements IRefreshListener {
 
-    private int mCurrentPage = 1;
+    private int mCurrentPage=1;
 
     @Override
     protected SimpleAdapter<CollectionBean, ItemCollectionBinding> createAdapter() {
@@ -60,18 +60,13 @@ public class MainActivity extends BaseRecyclerActivity<CollectionBean, AcMyColle
     @Override
     public void onRefresh() {
         mCurrentPage = 1;
-        // 模拟请求网络接口
         requestCollectionData(mCurrentPage);
     }
 
     @Override
-    public void onLoadMore(int page, int pageSize) {
-        mCurrentPage++;
-        // 模拟请求分页网络接口
+    public void onLoadMore() {
         requestCollectionData(mCurrentPage);
     }
-
-
 
     private void requestCollectionData(int page) {
         binding.tvCollectionCount.setText("数据加载中...");
@@ -81,25 +76,36 @@ public class MainActivity extends BaseRecyclerActivity<CollectionBean, AcMyColle
 
             List<CollectionBean> resultList = getMockData(page);
 
+            // 假设最多 5 页数据：当请求的是第 5 页时，说明没有更多了 (hasMore = false)
+            boolean hasMore = page < 5;
+
             if (page == 1) {
-                refreshListSuccess(resultList);
+                // 3. 下拉刷新成功：也把 hasMore 传给控制器，并让 mCurrentPage 变为 2（为下一次加载更多做准备）
+                mCurrentPage = 2;
+                refreshListSuccess(resultList, hasMore);
                 binding.tvCollectionCount.setText("当前共收藏了 " + resultList.size() + " 个宝贝");
             } else {
-                // 如果最多只有5页，当 page == 5 时，代表这已经是最后一页了，后面没有了 (hasMore = false)
-                boolean hasMore = page < 5;
-
+                // 4. 加载更多成功：如果后面还有更多，页码 +1；没有更多就不再加
+                if (hasMore) {
+                    mCurrentPage++;
+                }
                 loadMoreSuccess(resultList, hasMore);
                 binding.tvCollectionCount.setText("当前共收藏了 " + (mAdapter.getItemCount()) + " 个宝贝");
             }
         }, 500);
     }
 
+    @Override
+    protected boolean isSupportPaging() {
+        return true;
+    }
+
     // 模拟数据源
     private List<CollectionBean> getMockData(int page) {
         List<CollectionBean> list = new ArrayList<>();
-        for (int i = 0; i < 15; i++) {
-            list.add(new CollectionBean("宝贝Item " + ((page - 1) * 15 + i)));
-        }
+//        for (int i = 0; i < 5; i++) {
+//            list.add(new CollectionBean("宝贝Item " + ((page - 1) * 15 + i)));
+//        }
         return list;
     }
 

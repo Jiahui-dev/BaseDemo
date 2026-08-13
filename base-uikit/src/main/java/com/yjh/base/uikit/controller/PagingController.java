@@ -28,10 +28,6 @@ public class PagingController implements Lifecycle {
     private final BaseRecyclerActivity<?, ?> mActivity;
     private final OnPagingListener mListener;
 
-    private final int mStartPage;
-    private final int mPageSize;
-    private int mCurrentPage;
-
     private RecyclerView mRecyclerView;
     private SimpleAdapter<?, ?> mAdapter;
     private UikitViewLoadMoreBinding mFooterBinding;
@@ -44,14 +40,6 @@ public class PagingController implements Lifecycle {
     public PagingController(@NonNull BaseRecyclerActivity<?, ?> activity, @NonNull OnPagingListener listener) {
         this.mActivity = activity;
         this.mListener = listener;
-
-        this.mPageSize = listener.getPageSize();
-        if (this.mPageSize <= 0) {
-            throw new IllegalArgumentException("【" + activity.getClass().getSimpleName() + "】分页设置每页大小必须大于 0！");
-        }
-
-        this.mStartPage = listener.getStartPage();
-        this.mCurrentPage = mStartPage;
     }
 
     @Override
@@ -64,10 +52,7 @@ public class PagingController implements Lifecycle {
                 if (mAdapter != null && mRecyclerView != null) {
                     mAdapter.setFooterView(UikitViewLoadMoreBinding::inflate, mRecyclerView);
                     mFooterBinding = mAdapter.getFooterBinding();
-                    if (mFooterBinding != null) {
-                        mFooterBinding.pbLoading.setVisibility(View.GONE);
-                        mFooterBinding.tvLoading.setVisibility(View.GONE);
-                    }
+                    hideFooter();
                 }
                 initListener();
                 break;
@@ -86,11 +71,11 @@ public class PagingController implements Lifecycle {
     }
 
     /**
-     * 下拉刷新/首次加载成功：重置页码，刷新列表，更新 Footer
+     * 下拉刷新/首次加载成功：刷新列表，更新 Footer
      */
-    public <T> void refreshSuccess(List<T> list) {
-        this.mCurrentPage = mStartPage;
+    public <T> void refreshSuccess(List<T> list, boolean hasMore) {
         this.mIsLoading = false;
+        this.mHasMore = hasMore;
         if (mAdapter != null) {
             mAdapter.setList(list);
         }
@@ -100,13 +85,13 @@ public class PagingController implements Lifecycle {
     /**
      * 加载更多成功：自动页码 +1、追加数据到 Adapter、更新 Footer 状态
      */
-    public <T> void loadMoreSuccess(List<T> list) {
+    public <T> void loadMoreSuccess(List<T> list, boolean hasMore) {
         this.mIsLoading = false;
-        this.mCurrentPage++;
+        this.mHasMore = hasMore;
         if (mAdapter != null) {
             mAdapter.addList(list);
         }
-        updateFooter(list);
+        updateFooter(mAdapter != null ? mAdapter.getList() : list);
     }
 
     /**
@@ -121,43 +106,37 @@ public class PagingController implements Lifecycle {
         mFooterBinding.getRoot().setOnClickListener(v -> startLoadMore());
     }
 
-    private <T> void updateFooter(List<T> data) {
-        this.mHasMore = (data != null && data.size() >= mPageSize);
+    private void updateFooter(List<?> list) {
         if (mFooterBinding == null) return;
+
+        if (list == null || list.isEmpty()) {
+            mFooterBinding.getRoot().setVisibility(View.GONE);
+            return;
+        }
+
+        mFooterBinding.getRoot().setVisibility(View.VISIBLE);
         mFooterBinding.pbLoading.setVisibility(View.GONE);
         mFooterBinding.getRoot().setOnClickListener(null);
 
         if (mHasMore) {
             mFooterBinding.tvLoading.setVisibility(View.GONE);
         } else {
-            if (mRecyclerView != null) {
-                mRecyclerView.postDelayed(() -> {
-                    if (mFooterBinding == null || mRecyclerView == null) return;
-                    RecyclerView.LayoutManager lm = mRecyclerView.getLayoutManager();
-                    int totalItem = lm != null ? lm.getItemCount() : 0;
-                    if (totalItem <= mPreloadThreshold + 2) {
-                        mFooterBinding.tvLoading.setVisibility(View.GONE);
-                    } else {
-                        mFooterBinding.tvLoading.setVisibility(View.VISIBLE);
-                        mFooterBinding.tvLoading.setText(mListener.getEndFooterText());
-                    }
-                }, 150);
-            }
+            mFooterBinding.tvLoading.setVisibility(View.VISIBLE);
+            mFooterBinding.tvLoading.setText(mListener.getEndFooterText());
         }
     }
 
     private void startLoadMore() {
         mIsLoading = true;
         if (mFooterBinding != null) {
+            mFooterBinding.getRoot().setVisibility(View.VISIBLE);
             mFooterBinding.pbLoading.setVisibility(View.VISIBLE);
             mFooterBinding.tvLoading.setVisibility(View.VISIBLE);
             mFooterBinding.tvLoading.setText("正在加载...");
             mFooterBinding.getRoot().setOnClickListener(null);
         }
-        if (mListener != null) {
-            // 将下一次要请求的页码抛给上层
-            mListener.onLoadMore(mCurrentPage + 1, mPageSize);
-        }
+        // 通知业务层去加载更多
+        mListener.onLoadMore();
     }
 
     private void initListener() {
@@ -206,14 +185,6 @@ public class PagingController implements Lifecycle {
         return max;
     }
 
-    public int getCurrentPage() {
-        return mCurrentPage;
-    }
-
-    public int getPageSize() {
-        return mPageSize;
-    }
-
     // 设置 Footer 背景色
     public void setFooterBackgroundColorRes(@ColorRes int colorRes) {
         if (mFooterBinding != null) {
@@ -234,23 +205,26 @@ public class PagingController implements Lifecycle {
     }
 
     /**
+     * 隐藏并重置 Footer（在下拉刷新/重新搜索/发起请求时调用）
+     */
+    public void hideFooter() {
+        this.mIsLoading = false;
+        if (mFooterBinding != null) {
+            mFooterBinding.pbLoading.setVisibility(View.GONE);
+            mFooterBinding.tvLoading.setVisibility(View.GONE);
+            mFooterBinding.getRoot().setVisibility(View.GONE);
+        }
+    }
+
+    /**
      * 分页配置与加载回调接口
      */
     public interface OnPagingListener {
 
-        int getPageSize();
-
         /**
          * 滑动到底部触发加载更多
-         *
-         * @param page     下一次要请求的页码
-         * @param pageSize 每页数量
          */
-        void onLoadMore(int page, int pageSize);
-
-        default int getStartPage() {
-            return 1;
-        }
+        void onLoadMore();
 
         default String getEndFooterText() {
             return "已经到底啦";
