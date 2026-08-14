@@ -168,7 +168,9 @@ public abstract class BaseSearchActivity<T> extends BaseRecyclerActivity<T, Uiki
 
     protected abstract void doSearch(String keyword);
 
-    protected abstract void doLoadMore(String keyword);
+    protected void doLoadMore(String keyword){
+
+    };
 
     protected void loadAndShowHistory() {
         List<String> history = getSearchHistory();

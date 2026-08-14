@@ -91,7 +91,7 @@ public class MainActivity extends BaseRecyclerActivity<CollectionBean, AcMyColle
                     mCurrentPage++;
                 }
                 loadMoreSuccess(resultList, hasMore);
-                binding.tvCollectionCount.setText("当前共收藏了 " + (mAdapter.getItemCount()) + " 个宝贝");
+                binding.tvCollectionCount.setText("当前共收藏了 " + (mAdapter.getListCount()) + " 个宝贝");
             }
         }, 500);
     }

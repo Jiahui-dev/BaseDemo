@@ -67,7 +67,6 @@
             android:id="@+id/swipeRefresh"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/uikit_grey_backGround"
             android:visibility="gone">
 
             <FrameLayout

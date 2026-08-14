@@ -28,6 +28,8 @@ public abstract class BaseRecyclerActivity<T, VB extends ViewBinding> extends Ba
     protected PagingController mPagingController;
     protected SwipeRefreshController mRefreshController;
 
+    private static final int MIN_SHOW_FOOTER_COUNT = 10;
+
     public RecyclerView getRecyclerView() {
         return mRecyclerView;
     }
@@ -79,17 +81,14 @@ public abstract class BaseRecyclerActivity<T, VB extends ViewBinding> extends Ba
             mRecyclerView.setAdapter(mAdapter);
 
             if (mAdapter != null) {
-                // 1. 设置默认空布局（如果全局都用一套，直接在基类加载）
                 View defaultEmptyView = LayoutInflater.from(this)
                         .inflate(getEmptyLayoutResId(), mRecyclerView, false);
                 mAdapter.setEmptyView(defaultEmptyView);
 
-                // 2. 设置默认错误布局
                 View defaultErrorView = LayoutInflater.from(this)
                         .inflate(getErrorLayoutResId(), mRecyclerView, false);
                 mAdapter.setErrorView(defaultErrorView);
 
-                // 3. 默认点击错误页重试触发 autoRefresh()
                 mAdapter.setOnRetryListener(this::autoRefresh);
             }
 
@@ -128,6 +127,8 @@ public abstract class BaseRecyclerActivity<T, VB extends ViewBinding> extends Ba
             }
         }
 
+        updateFooterState(hasMore);
+
     }
 
     public void refreshListFailed(String msg) {
@@ -150,8 +151,11 @@ public abstract class BaseRecyclerActivity<T, VB extends ViewBinding> extends Ba
         if (mPagingController != null) {
             mPagingController.loadMoreSuccess(list, hasMore);
         } else if (mAdapter != null) {
-            mAdapter.addList(list);
+            mAdapter.addData(list);
         }
+
+        updateFooterState(hasMore);
+
     }
 
     public void loadMoreFailed() {
@@ -217,6 +221,26 @@ public abstract class BaseRecyclerActivity<T, VB extends ViewBinding> extends Ba
      */
     protected int getErrorLayoutResId() {
         return R.layout.uikit_view_state_error;
+    }
+
+    /**
+     * 统一控制 Footer 的显示状态
+     */
+    private void updateFooterState(boolean hasMore) {
+        if (mAdapter == null) return;
+
+        if (hasMore) {
+            // 还有更多数据，Footer 处于隐藏状态（等待上拉触发 LOADING）
+            mAdapter.setFooterState(SimpleAdapter.FooterState.HIDDEN);
+        } else {
+            if (mAdapter.getListCount() >= MIN_SHOW_FOOTER_COUNT) {
+                // 数据量足够多，才显示“已经到底啦”
+                mAdapter.setFooterState(SimpleAdapter.FooterState.NO_MORE);
+            } else {
+                // 数据量太少，直接隐藏 Footer
+                mAdapter.setFooterState(SimpleAdapter.FooterState.HIDDEN);
+            }
+        }
     }
 
 }

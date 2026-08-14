@@ -23,7 +23,6 @@ public class RetrofitFactory {
         builder.readTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
         builder.writeTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
 
-        // 直接读取 AppConfig.DEBUG_ENABLE
         if (AppConfig.DEBUG_ENABLE) {
             HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
                 @Override

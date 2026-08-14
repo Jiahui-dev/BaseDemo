@@ -14,6 +14,7 @@ import androidx.viewbinding.ViewBinding;
 
 import com.yjh.base.uikit.R;
 import com.yjh.base.uikit.adapter.holder.BaseViewHolder;
+import com.yjh.base.uikit.databinding.UikitViewLoadMoreBinding;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,20 @@ public class SimpleAdapter<T, VB extends ViewBinding> extends RecyclerView.Adapt
     public static final int TYPE_FOOTER = 1;
     public static final int TYPE_EMPTY = 2;
     public static final int TYPE_ERROR = 3;
+
+    public enum FooterState {
+        HIDDEN,      // 完全隐藏（不占用 Item 数量）
+        LOADING,     // 正在加载...
+        NO_MORE,     // 没有更多数据了
+        ERROR        // 加载失败，点击重试
+    }
+
+    private FooterState mFooterState = FooterState.HIDDEN;
+    private OnRetryListener mOnFooterRetryListener;
+
+    public void setOnFooterRetryListener(OnRetryListener listener) {
+        this.mOnFooterRetryListener = listener;
+    }
 
     protected Context mContext;
     protected List<T> mList;
@@ -97,14 +112,11 @@ public class SimpleAdapter<T, VB extends ViewBinding> extends RecyclerView.Adapt
     @Override
     public int getItemViewType(int position) {
         if (mList.isEmpty()) {
-            if (mPageState == 1 && mEmptyView != null) {
-                return TYPE_EMPTY;
-            }
-            if (mPageState == 2 && mErrorView != null) {
-                return TYPE_ERROR;
-            }
+            if (mPageState == 1 && mEmptyView != null) return TYPE_EMPTY;
+            if (mPageState == 2 && mErrorView != null) return TYPE_ERROR;
         }
-        if (mFooterBinding != null && position == getItemCount() - 1) {
+        // 当 position 是最后一个，且 Footer 状态不为 HIDDEN 时返回 TYPE_FOOTER
+        if (mFooterBinding != null && mFooterState != FooterState.HIDDEN && position == getItemCount() - 1) {
             return TYPE_FOOTER;
         }
         return TYPE_CONTENT;
@@ -164,8 +176,13 @@ public class SimpleAdapter<T, VB extends ViewBinding> extends RecyclerView.Adapt
             return;
         }
 
-        if (viewType == TYPE_EMPTY || viewType == TYPE_FOOTER) {
-            return; // 静态 View 不绑定业务逻辑
+        if (viewType == TYPE_FOOTER) {
+            bindFooterViewHolder((UikitViewLoadMoreBinding) mFooterBinding);
+            return;
+        }
+
+        if (viewType == TYPE_EMPTY) {
+            return;
         }
 
         final T item = mList.get(position);
@@ -186,20 +203,13 @@ public class SimpleAdapter<T, VB extends ViewBinding> extends RecyclerView.Adapt
     @Override
     public int getItemCount() {
         if (mList.isEmpty()) {
-            if (mPageState == 1 && mEmptyView != null) {
-                Log.d(TAG, "getItemCount: mList 为空, mPageState=1, 返回 Item 数量 = 1 (EmptyView)");
-                return 1;
-            }
-            if (mPageState == 2 && mErrorView != null) {
-                Log.d(TAG, "getItemCount: mList 为空, mPageState=2, 返回 Item 数量 = 1 (ErrorView)");
-                return 1;
-            }
-            Log.d(TAG, "getItemCount: mList 为空，但未满足空/错误状态条件, mPageState = " + mPageState + ", 返回 Item 数量 = 0");
+            if (mPageState == 1 && mEmptyView != null) return 1;
+            if (mPageState == 2 && mErrorView != null) return 1;
             return 0;
         }
-        int count = mList.size() + (mFooterBinding == null ? 0 : 1);
-        Log.d(TAG, "getItemCount: 列表有数据，返回 Item 数量 = " + count);
-        return count;
+        // 只有当 Footer 存在 且 状态不是 HIDDEN 时，getItemCount 才会 +1
+        int footerCount = (mFooterBinding != null && mFooterState != FooterState.HIDDEN) ? 1 : 0;
+        return mList.size() + footerCount;
     }
 
     public int getFooterLayoutCount() {
@@ -215,8 +225,16 @@ public class SimpleAdapter<T, VB extends ViewBinding> extends RecyclerView.Adapt
     public <FB extends ViewBinding> void setFooterView(@NonNull Creator<FB> footerCreator, @NonNull ViewGroup parent) {
         FB footerBinding = footerCreator.create(LayoutInflater.from(mContext), parent, false);
         if (mFooterBinding == footerBinding) return;
+
+        boolean wasNull = (mFooterBinding == null);
         mFooterBinding = footerBinding;
-        notifyItemInserted(getItemCount() - 1);
+
+        if (wasNull) {
+            // 插入前，Footer 应该在旧数据的末尾（即当前的 getItemCount() - 1）
+            notifyItemInserted(getItemCount() - 1);
+        } else {
+            notifyItemChanged(getItemCount() - 1);
+        }
     }
 
     /**
@@ -232,13 +250,15 @@ public class SimpleAdapter<T, VB extends ViewBinding> extends RecyclerView.Adapt
      */
     public void removeFooterView() {
         if (mFooterBinding != null) {
-            mFooterBinding = null;
-            notifyItemRemoved(getItemCount() - 1);
+            int previousFooterPosition = getItemCount() - 1; // 1. 先保存 Footer 移除前的真实位置
+            mFooterBinding = null;                          // 2. 清空标记
+            notifyItemRemoved(previousFooterPosition);       // 3. 通知移除该位置
         }
     }
 
     public void resetState() {
         this.mPageState = 0; // 重置状态为普通列表
+        this.mFooterState = FooterState.HIDDEN;
         notifyDataSetChanged(); // 刷新 UI，清除出现的 Stub View
     }
 
@@ -257,12 +277,16 @@ public class SimpleAdapter<T, VB extends ViewBinding> extends RecyclerView.Adapt
     /**
      * 往列表末尾追加分页数据
      */
-    @SuppressWarnings("unchecked")
-    public void addList(List<?> list) {
+    public void addData(List<?> list) {
         if (list != null && !list.isEmpty()) {
-            int startPos = mList.size();
+            // 数据追加前的末尾位置（如果当前显示了 Footer，新数据插入点就在 mList.size()）
+            int insertPosition = mList.size();
+
+            // 1. 更新底层数据源
             this.mList.addAll((List<T>) list);
-            notifyItemRangeInserted(startPos, list.size());
+
+            // 2. 正确通知区间插入
+            notifyItemRangeInserted(insertPosition, list.size());
         }
     }
 
@@ -271,6 +295,10 @@ public class SimpleAdapter<T, VB extends ViewBinding> extends RecyclerView.Adapt
      */
     public List<T> getList() {
         return mList;
+    }
+
+    public int getListCount() {
+        return mList == null ? 0 : mList.size();
     }
 
     /**
@@ -315,6 +343,75 @@ public class SimpleAdapter<T, VB extends ViewBinding> extends RecyclerView.Adapt
             params.height = height;
         }
         view.setLayoutParams(params);
+    }
+
+    public FooterState getFooterState() {
+        return mFooterState;
+    }
+
+    /**
+     * 更新 Footer 状态
+     */
+    public void setFooterState(FooterState state) {
+        if (this.mFooterState == state) return;
+
+        FooterState prevState = this.mFooterState;
+        this.mFooterState = state;
+
+        if (mFooterBinding == null) return;
+
+        // 1. 从 隐藏 -> 显示：需要通知 RecyclerView 插入了一个新 Item
+        if (prevState == FooterState.HIDDEN) {
+            notifyItemInserted(getItemCount() - 1);
+        }
+        // 2. 从 显示 -> 隐藏：需要通知 RecyclerView 移除了末尾的 Item
+        else if (state == FooterState.HIDDEN) {
+            // 移除前，Footer 的位置就在当前的末尾
+            notifyItemRemoved(mList.size());
+        }
+        // 3. 在显示状态之间切换（如 LOADING -> ERROR / NO_MORE）：只需更新末尾视图
+        else {
+            notifyItemChanged(getItemCount() - 1);
+        }
+    }
+
+    private void bindFooterViewHolder(UikitViewLoadMoreBinding footerBinding) {
+        if (footerBinding == null) return;
+
+        switch (mFooterState) {
+            case LOADING:
+                footerBinding.getRoot().setVisibility(View.VISIBLE);
+                footerBinding.pbLoading.setVisibility(View.VISIBLE);
+                footerBinding.tvLoading.setVisibility(View.VISIBLE);
+                footerBinding.tvLoading.setText("正在加载...");
+                footerBinding.getRoot().setOnClickListener(null);
+                break;
+
+            case NO_MORE:
+                footerBinding.getRoot().setVisibility(View.VISIBLE);
+                footerBinding.pbLoading.setVisibility(View.GONE);
+                footerBinding.tvLoading.setVisibility(View.VISIBLE);
+                footerBinding.tvLoading.setText("已经到底啦");
+                footerBinding.getRoot().setOnClickListener(null);
+                break;
+
+            case ERROR:
+                footerBinding.getRoot().setVisibility(View.VISIBLE);
+                footerBinding.pbLoading.setVisibility(View.GONE);
+                footerBinding.tvLoading.setVisibility(View.VISIBLE);
+                footerBinding.tvLoading.setText("加载失败，点击重试");
+                footerBinding.getRoot().setOnClickListener(v -> {
+                    if (mOnFooterRetryListener != null) {
+                        mOnFooterRetryListener.onRetry();
+                    }
+                });
+                break;
+
+            case HIDDEN:
+            default:
+                footerBinding.getRoot().setVisibility(View.GONE);
+                break;
+        }
     }
 
 }

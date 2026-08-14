@@ -76,7 +76,7 @@ public class PagingController implements Lifecycle {
     public <T> void refreshSuccess(List<T> list, boolean hasMore) {
         this.mIsLoading = false;
         this.mHasMore = hasMore;
-        updateFooter(list);
+        updateFooterState(list);
     }
 
     /**
@@ -86,9 +86,9 @@ public class PagingController implements Lifecycle {
         this.mIsLoading = false;
         this.mHasMore = hasMore;
         if (mAdapter != null) {
-            mAdapter.addList(list);
+            mAdapter.addData(list);
         }
-        updateFooter(mAdapter != null ? mAdapter.getList() : list);
+        updateFooterState(mAdapter != null ? mAdapter.getList() : list);
     }
 
     /**
@@ -96,47 +96,45 @@ public class PagingController implements Lifecycle {
      */
     public void loadMoreFailed() {
         this.mIsLoading = false;
-        if (mFooterBinding == null) return;
-        mFooterBinding.pbLoading.setVisibility(View.GONE);
-        mFooterBinding.tvLoading.setVisibility(View.VISIBLE);
-        mFooterBinding.tvLoading.setText("加载失败, 点击重试");
-        mFooterBinding.getRoot().setOnClickListener(v -> startLoadMore());
+        if (mAdapter != null) {
+            mAdapter.setFooterState(SimpleAdapter.FooterState.ERROR);
+        }
     }
 
-    private void updateFooter(List<?> list) {
-        if (mFooterBinding == null) return;
+    private void updateFooterState(List<?> list) {
+        if (mAdapter == null) return;
 
+        // 如果列表为空，完全隐藏 Footer
         if (list == null || list.isEmpty()) {
-            mFooterBinding.getRoot().setVisibility(View.GONE);
+            mAdapter.setFooterState(SimpleAdapter.FooterState.HIDDEN);
             return;
         }
 
-        mFooterBinding.getRoot().setVisibility(View.VISIBLE);
-        mFooterBinding.pbLoading.setVisibility(View.GONE);
-        mFooterBinding.getRoot().setOnClickListener(null);
-
+        // 根据是否有更多数据切换状态
         if (mHasMore) {
-            mFooterBinding.tvLoading.setVisibility(View.GONE);
+            // 有更多数据时，滑动未触发时可先隐藏或保持等待
+            mAdapter.setFooterState(SimpleAdapter.FooterState.HIDDEN);
         } else {
-            mFooterBinding.tvLoading.setVisibility(View.VISIBLE);
-            mFooterBinding.tvLoading.setText(mListener.getEndFooterText());
+            mAdapter.setFooterState(SimpleAdapter.FooterState.NO_MORE);
         }
     }
 
     private void startLoadMore() {
         mIsLoading = true;
-        if (mFooterBinding != null) {
-            mFooterBinding.getRoot().setVisibility(View.VISIBLE);
-            mFooterBinding.pbLoading.setVisibility(View.VISIBLE);
-            mFooterBinding.tvLoading.setVisibility(View.VISIBLE);
-            mFooterBinding.tvLoading.setText("正在加载...");
-            mFooterBinding.getRoot().setOnClickListener(null);
+        if (mAdapter != null) {
+            mAdapter.setFooterState(SimpleAdapter.FooterState.LOADING);
         }
         // 通知业务层去加载更多
         mListener.onLoadMore();
     }
 
     private void initListener() {
+
+        if (mAdapter != null) {
+            // 设置点击 Footer 重试回调
+            mAdapter.setOnFooterRetryListener(this::startLoadMore);
+        }
+
         if (mRecyclerView == null || mScrollListener != null) return;
         mScrollListener = new RecyclerView.OnScrollListener() {
             @Override
@@ -206,10 +204,8 @@ public class PagingController implements Lifecycle {
      */
     public void hideFooter() {
         this.mIsLoading = false;
-        if (mFooterBinding != null) {
-            mFooterBinding.pbLoading.setVisibility(View.GONE);
-            mFooterBinding.tvLoading.setVisibility(View.GONE);
-            mFooterBinding.getRoot().setVisibility(View.GONE);
+        if (mAdapter != null) {
+            mAdapter.setFooterState(SimpleAdapter.FooterState.HIDDEN);
         }
     }
 
