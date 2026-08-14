@@ -47,6 +47,21 @@ public abstract class BaseRecyclerActivity<T, VB extends ViewBinding> extends Ba
     @Override
     protected void onRegisterControllers() {
         super.onRegisterControllers();
+        //这里不能注册与 View 有关的全局 Controller
+//        View refreshView = attachRefreshLayout();
+//        if (refreshView != null) {
+//            mRefreshController = new wipeRefreshController(this, refreshView);
+//            if (this instanceof IRefreshListener) {
+//                mRefreshController.setOnRefreshListener((IRefreshListener) this);
+//            }
+//            registerController("refresh_controller", mRefreshController);
+//        }
+    }
+
+    @Override
+    protected void initView() {
+        super.initView();
+
         View refreshView = attachRefreshLayout();
         if (refreshView != null) {
             mRefreshController = new SwipeRefreshController(this, refreshView);
@@ -55,11 +70,6 @@ public abstract class BaseRecyclerActivity<T, VB extends ViewBinding> extends Ba
             }
             registerController("refresh_controller", mRefreshController);
         }
-    }
-
-    @Override
-    protected void initView() {
-        super.initView();
 
         mRecyclerView = attachRecyclerView();
         if (mRecyclerView != null) {
@@ -98,6 +108,7 @@ public abstract class BaseRecyclerActivity<T, VB extends ViewBinding> extends Ba
     }
 
     public void refreshListSuccess(List<T> list, boolean hasMore) {
+
         if (mRefreshController != null) {
             mRefreshController.finishRefresh();
         }
