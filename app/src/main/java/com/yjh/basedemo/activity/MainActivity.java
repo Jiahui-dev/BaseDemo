@@ -83,6 +83,7 @@ public class MainActivity extends BaseRecyclerActivity<CollectionBean, AcMyColle
                 // 3. 下拉刷新成功：也把 hasMore 传给控制器，并让 mCurrentPage 变为 2（为下一次加载更多做准备）
                 mCurrentPage = 2;
                 refreshListSuccess(resultList, hasMore);
+                //refreshListFailed("网络出错了🌐");
                 binding.tvCollectionCount.setText("当前共收藏了 " + resultList.size() + " 个宝贝");
             } else {
                 // 4. 加载更多成功：如果后面还有更多，页码 +1；没有更多就不再加
@@ -103,9 +104,9 @@ public class MainActivity extends BaseRecyclerActivity<CollectionBean, AcMyColle
     // 模拟数据源
     private List<CollectionBean> getMockData(int page) {
         List<CollectionBean> list = new ArrayList<>();
-//        for (int i = 0; i < 5; i++) {
-//            list.add(new CollectionBean("宝贝Item " + ((page - 1) * 15 + i)));
-//        }
+        for (int i = 0; i < 15; i++) {
+            list.add(new CollectionBean("宝贝Item " + ((page - 1) * 15 + i)));
+        }
         return list;
     }
 

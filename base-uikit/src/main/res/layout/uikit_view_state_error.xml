@@ -15,7 +15,7 @@
         android:src="@drawable/uikit_pic_stub_network_error" />
 
     <TextView
-        android:id="@+id/uikit_tv_error_title"
+        android:id="@+id/uikit_tv_error_msg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -23,15 +23,6 @@
         android:textColor="#666666"
         android:textSize="15sp"
         android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/uikit_tv_error_sub"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="请检查网络设置或稍后重试"
-        android:textColor="#999999"
-        android:textSize="13sp" />
 
     <Button
         android:id="@+id/uikit_btn_retry"

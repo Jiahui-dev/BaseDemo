@@ -76,9 +76,6 @@ public class PagingController implements Lifecycle {
     public <T> void refreshSuccess(List<T> list, boolean hasMore) {
         this.mIsLoading = false;
         this.mHasMore = hasMore;
-        if (mAdapter != null) {
-            mAdapter.setList(list);
-        }
         updateFooter(list);
     }
 

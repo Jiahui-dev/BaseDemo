@@ -1,5 +1,7 @@
 package com.yjh.base.uikit.adapter.holder;
 
+import android.view.View;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
@@ -16,5 +18,13 @@ public class BaseViewHolder<VB extends ViewBinding> extends RecyclerView.ViewHol
     public BaseViewHolder(@NonNull VB binding) {
         super(binding.getRoot());
         this.binding=binding;
+    }
+
+    /**
+     * 针对原生 View (如 EmptyView, ErrorView) 的构造函数
+     */
+    public BaseViewHolder(@NonNull View itemView) {
+        super(itemView);
+        this.binding = null;
     }
 }

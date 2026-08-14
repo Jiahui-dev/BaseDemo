@@ -13,7 +13,6 @@ import android.widget.EditText;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.yjh.base.uikit.R;
-import com.yjh.base.uikit.controller.StateController;
 import com.yjh.base.uikit.databinding.UikitAcBaseSearchBinding;
 import com.yjh.base.uikit.databinding.UikitItemHistoryBinding;
 import com.yjh.base.uikit.listener.IRefreshListener;

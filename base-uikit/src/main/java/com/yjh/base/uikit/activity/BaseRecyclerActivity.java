@@ -1,9 +1,7 @@
 package com.yjh.base.uikit.activity;
 
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewStub;
-import android.widget.FrameLayout;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,7 +10,6 @@ import androidx.viewbinding.ViewBinding;
 import com.yjh.base.uikit.R;
 import com.yjh.base.uikit.adapter.SimpleAdapter;
 import com.yjh.base.uikit.controller.PagingController;
-import com.yjh.base.uikit.controller.StateController;
 import com.yjh.base.uikit.controller.SwipeRefreshController;
 import com.yjh.base.uikit.decoration.SpaceItemDecoration;
 import com.yjh.base.uikit.listener.IRefreshListener;
@@ -28,7 +25,6 @@ public abstract class BaseRecyclerActivity<T, VB extends ViewBinding> extends Ba
 
     protected RecyclerView mRecyclerView;
     protected SimpleAdapter<T, ? extends ViewBinding> mAdapter;
-    protected StateController mStateController;
     protected PagingController mPagingController;
     protected SwipeRefreshController mRefreshController;
 
@@ -72,11 +68,20 @@ public abstract class BaseRecyclerActivity<T, VB extends ViewBinding> extends Ba
             mAdapter = createAdapter();
             mRecyclerView.setAdapter(mAdapter);
 
-            mStateController = new StateController(this, mRecyclerView);
+            if (mAdapter != null) {
+                // 1. 设置默认空布局（如果全局都用一套，直接在基类加载）
+                View defaultEmptyView = LayoutInflater.from(this)
+                        .inflate(getEmptyLayoutResId(), mRecyclerView, false);
+                mAdapter.setEmptyView(defaultEmptyView);
 
-            mountViewStub(mStateController);
+                // 2. 设置默认错误布局
+                View defaultErrorView = LayoutInflater.from(this)
+                        .inflate(getErrorLayoutResId(), mRecyclerView, false);
+                mAdapter.setErrorView(defaultErrorView);
 
-            registerController("state_controller", mStateController);
+                // 3. 默认点击错误页重试触发 autoRefresh()
+                mAdapter.setOnRetryListener(this::autoRefresh);
+            }
 
             mPagingController = new PagingController(this, this);
             int footerBgRes = setFooterBackgroundColorRes();
@@ -97,27 +102,36 @@ public abstract class BaseRecyclerActivity<T, VB extends ViewBinding> extends Ba
             mRefreshController.finishRefresh();
         }
 
-        if (mAdapter != null) {
-            mAdapter.setList(list);
-        }
-
         if (mPagingController != null) {
             mPagingController.refreshSuccess(list, hasMore);
         }
 
-        if (mStateController != null) {
-            mStateController.handleData(list);
+        if (mAdapter != null) {
+            if (list == null || list.isEmpty()) {
+                // 列表为空：更新数据源并通知 Adapter 渲染空页面 TYPE_EMPTY
+                mAdapter.setList(null);
+                mAdapter.showEmpty();
+            } else {
+                // 有数据：正常渲染列表 TYPE_CONTENT
+                mAdapter.setList(list);
+            }
         }
+
     }
 
     public void refreshListFailed(String msg) {
+        if (mRefreshController != null) {
+            mRefreshController.finishRefresh();
+        }
 
-        mRefreshController.finishRefresh();
-
-        if (mAdapter == null || mAdapter.getItemCount() == 0) {
-            if (mStateController != null) mStateController.showError();
-        } else {
-            showError(msg);
+        if (mAdapter != null) {
+            // 如果当前列表完全没数据，展示错误缺省页 TYPE_ERROR
+            if (mAdapter.getList() == null || mAdapter.getList().isEmpty()) {
+                mAdapter.showError(msg);
+            } else {
+                // 如果本地已有列表数据，刷新失败仅弹 Toast 提示
+                showError(msg);
+            }
         }
     }
 
@@ -157,9 +171,15 @@ public abstract class BaseRecyclerActivity<T, VB extends ViewBinding> extends Ba
         if (mPagingController != null) {
             mPagingController.hideFooter();
         }
+
+        if (mAdapter != null) {
+            mAdapter.resetState();
+        }
+
         if (mRefreshController != null) {
             mRefreshController.autoRefresh();
         }
+
     }
 
     public void finishRefresh() {
@@ -175,60 +195,17 @@ public abstract class BaseRecyclerActivity<T, VB extends ViewBinding> extends Ba
     }
 
     /**
-     * 注入缺省页遮罩
+     * 默认空布局
      */
-    private void mountViewStub(StateController stateController) {
-        View targetView = attachRefreshLayout();
-        if (targetView == null) {
-            targetView = mRecyclerView;
-        }
+    protected int getEmptyLayoutResId() {
+        return R.layout.uikit_view_state_empty;
+    }
 
-        ViewGroup parent = (ViewGroup) targetView.getParent();
-        if (parent == null) return;
-
-        FrameLayout maskContainer = new FrameLayout(this);
-
-        ViewStub emptyStub = new ViewStub(this);
-        emptyStub.setLayoutResource(R.layout.uikit_view_state_empty);
-
-        ViewStub errorStub = new ViewStub(this);
-        errorStub.setLayoutResource(R.layout.uikit_view_state_error);
-
-        FrameLayout.LayoutParams stubParams = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-        );
-
-        maskContainer.addView(emptyStub, stubParams);
-        maskContainer.addView(errorStub, stubParams);
-
-        // 2. 将 ViewStub 正确注册给 StateController
-        stateController.setEmptyViewStub(emptyStub);
-        stateController.setErrorViewStub(errorStub);
-
-        // 3. 组装 View 树
-        ViewGroup.LayoutParams maskParams = new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-        );
-
-        if (parent instanceof FrameLayout || parent instanceof androidx.constraintlayout.widget.ConstraintLayout) {
-            parent.addView(maskContainer, maskParams);
-        } else {
-            int targetIndex = parent.indexOfChild(targetView);
-            ViewGroup.LayoutParams targetParams = targetView.getLayoutParams();
-
-            parent.removeView(targetView);
-
-            FrameLayout wrapper = new FrameLayout(this);
-            // 确保 targetView 居下，maskContainer 居上
-            wrapper.addView(targetView, new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            wrapper.addView(maskContainer, new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-            parent.addView(wrapper, targetIndex, targetParams);
-        }
+    /**
+     * 默认错误布局
+     */
+    protected int getErrorLayoutResId() {
+        return R.layout.uikit_view_state_error;
     }
 
 }
