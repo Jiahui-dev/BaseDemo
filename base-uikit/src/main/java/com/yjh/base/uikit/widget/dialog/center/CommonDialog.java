@@ -75,9 +75,9 @@ public class CommonDialog extends BaseDialog {
         return this;
     }
 
-    public CommonDialog setButtons(String cancelText, String confirmText) {
-        this.cancelText = cancelText;
+    public CommonDialog setButtons(String confirmText, String cancelText) {
         this.confirmText = confirmText;
+        this.cancelText = cancelText;
         return this;
     }
 

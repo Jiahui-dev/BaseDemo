@@ -79,6 +79,7 @@ public abstract class BaseSearchActivity<T> extends BaseRecyclerActivity<T, Uiki
         // 清空历史记录弹窗
         uikitAcBaseSearchBinding.ivDeleteHistory.setOnClickListener(v -> {
             CommonDialog dialog = new CommonDialog();
+            dialog.setTitle("提示");
             dialog.setContent("确认删除历史记录吗？");
             dialog.setOnConfirmListener(result -> {
                 clearSearchHistory();
