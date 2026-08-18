@@ -7,12 +7,12 @@
     android:paddingRight="10dp"
     android:paddingLeft="10dp"
     android:paddingStart="10dp"
-    android:background="@color/uikit_grey_backGround">
+    android:background="@color/uikit_grey">
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/uikit_grey_backGround">
+        android:background="@color/uikit_grey">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/contentView"
@@ -24,13 +24,13 @@
             android:id="@+id/emptyStub"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout="@layout/layout_empty_page"/>
+            android:layout="@layout/uikit_layout_empty_page"/>
 
         <ViewStub
             android:id="@+id/errorStub"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout="@layout/layout_error_page"/>
+            android:layout="@layout/uikit_layout_error_page"/>
 
     </FrameLayout>
 

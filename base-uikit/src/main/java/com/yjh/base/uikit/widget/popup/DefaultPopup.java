@@ -1,12 +1,16 @@
 package com.yjh.base.uikit.widget.popup;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.core.content.ContextCompat;
+
 import com.yjh.base.uikit.R;
 import java.util.List;
 
@@ -15,7 +19,10 @@ public class DefaultPopup extends BaseCustomPopup<String> {
     public DefaultPopup(Context context, List<String> items) {
         super(context, items);
         // 样式设置
-        container.setBackgroundResource(R.drawable.uikit_bg_popup_floating);
+        container.setBackgroundResource(R.drawable.uikit_shape_radius_08);
+        container.setBackgroundTintList(ColorStateList.valueOf(
+                ContextCompat.getColor(context, R.color.uikit_white)
+        ));
         container.setElevation(dip2px(2));
         setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);

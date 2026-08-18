@@ -29,7 +29,8 @@
         android:layout_width="120dp"
         android:layout_height="36dp"
         android:layout_marginTop="24dp"
-        android:background="@drawable/uikit_bg_blue_radius_25"
+        android:background="@drawable/uikit_shape_radius_25"
+        android:backgroundTint="@color/uikit_blue_light"
         android:text="重新加载"
         android:textColor="@color/uikit_white"
         android:textSize="14sp" />

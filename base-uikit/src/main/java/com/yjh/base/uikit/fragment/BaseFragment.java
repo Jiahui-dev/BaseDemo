@@ -54,7 +54,7 @@ public abstract class BaseFragment<VB extends ViewBinding> extends BaseCoreFragm
 
     protected View getTitleBarView() { return null; }
 
-    protected int getStatusBarColor() { return R.color.uikit_grey_backGround; }
+    protected int getStatusBarColor() { return R.color.uikit_grey; }
 
     protected boolean isStatusBarDarkFont() { return true; }
 
