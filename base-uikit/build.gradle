@@ -4,7 +4,6 @@ plugins {
 
 android {
     namespace 'com.yjh.base.uikit'
-    resourcePrefix "uikit_" // 强制所有资源文件名必须以 uikit_ 开头
     compileSdk {
         version = release(36) {
             minorApiLevel = 1

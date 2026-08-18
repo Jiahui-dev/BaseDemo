@@ -8,8 +8,9 @@
     <color name="uikit_blue">#42acff</color>
     <color name="uikit_blue_light">#69a6ff</color>
     <color name="uikit_green">#0fc161</color>
+    <color name="uikit_icon">#2C2C2C</color>
 
-    <color name="uikit_text_color_3">#333333</color>
-    <color name="uikit_text_color_6">#666666</color>
-    <color name="uikit_text_color_9">#999999</color>
+    <color name="uikit_text_3">#333333</color>
+    <color name="uikit_text_6">#666666</color>
+    <color name="uikit_text_9">#999999</color>
 </resources>
