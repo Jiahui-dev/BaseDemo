@@ -5,13 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="50dp">
 
-    <ImageView
+    <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/iv_back"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:layout_marginStart="6dp"
-        android:padding="5dp"
-        android:src="@drawable/uikit_ic_back"
+        app:srcCompat="@drawable/uikit_icon_back"
+        app:tint="#2C2C2C"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -57,7 +57,7 @@
             android:layout_width="18dp"
             android:layout_height="18dp"
             android:layout_marginStart="8dp"
-            android:src="@drawable/uikit_ic_search"
+            android:src="@drawable/uikit_icon_search"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
