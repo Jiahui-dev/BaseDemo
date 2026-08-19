@@ -1,8 +1,12 @@
 package com.yjh.base.uikit.widget.dialog.center;
 
+import android.content.DialogInterface;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+
 import com.yjh.base.uikit.R;
 
 /**
@@ -31,6 +35,14 @@ public class CommonDialog extends BaseDialog {
     @Override
     protected int getLayoutId() {
         return R.layout.uikit_dialog_common;
+    }
+
+    @Override
+    public void onDismiss(@NonNull DialogInterface dialog) {
+        super.onDismiss(dialog);
+        // 释放回调引用，切断 Activity 持有链
+        onConfirmListener = null;
+        onCancelListener = null;
     }
 
     @Override
@@ -90,4 +102,5 @@ public class CommonDialog extends BaseDialog {
         this.onCancelListener = listener;
         return this;
     }
+
 }
