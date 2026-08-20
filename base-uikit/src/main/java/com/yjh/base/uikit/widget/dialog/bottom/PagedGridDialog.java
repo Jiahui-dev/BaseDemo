@@ -7,16 +7,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 import com.yjh.base.uikit.R;
 import com.yjh.base.uikit.adapter.SimpleAdapter;
-import com.yjh.base.uikit.databinding.UikitItemGridPageBinding;
 import com.yjh.base.uikit.databinding.UikitItemGridPanelOptionBinding;
+import com.yjh.base.uikit.databinding.UikitLayoutListBinding;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 自动分页的通用网格底部弹窗
+ * 分页网格弹窗
  * Created by jiahui on 2026/07/22
  */
-public class GridPanelBottomDialog<T> extends BaseBottomDialog {
+public class PagedGridDialog<T> extends BaseBottomDialog {
 
     private ViewPager2 mViewPager;
     private LinearLayout mDotContainer;
@@ -39,14 +40,14 @@ public class GridPanelBottomDialog<T> extends BaseBottomDialog {
         void onItemClick(T data, int globalPosition);
     }
 
-    public static <T> GridPanelBottomDialog<T> newInstance(
+    public static <T> PagedGridDialog<T> newInstance(
             int rows,
             int columns,
             List<T> list,
             ItemBinder<T> binder,
             OnItemClickListener<T> listener) {
 
-        GridPanelBottomDialog<T> dialog = new GridPanelBottomDialog<>();
+        PagedGridDialog<T> dialog = new PagedGridDialog<>();
         dialog.mRows = Math.max(1, rows);
         dialog.mColumns = Math.max(1, columns);
         if (list != null) dialog.mTotalList.addAll(list);
@@ -58,14 +59,14 @@ public class GridPanelBottomDialog<T> extends BaseBottomDialog {
     /**
      * 设置是否显示每个图标下方的文字
      */
-    public GridPanelBottomDialog<T> showTitle(boolean show) {
+    public PagedGridDialog<T> showTitle(boolean show) {
         this.mShowItemName = show;
         return this;
     }
 
     @Override
     protected int getLayoutId() {
-        return R.layout.uikit_dialog_grid_panel;
+        return R.layout.uikit_dialog_grid_paged;
     }
 
     @Override
@@ -87,11 +88,11 @@ public class GridPanelBottomDialog<T> extends BaseBottomDialog {
         }
 
         // 3. 渲染 ViewPager2
-        SimpleAdapter<List<T>, UikitItemGridPageBinding> pageAdapter = new SimpleAdapter<>(
+        SimpleAdapter<List<T>, UikitLayoutListBinding> pageAdapter = new SimpleAdapter<>(
                 requireContext(),
-                UikitItemGridPageBinding::inflate,
+                UikitLayoutListBinding::inflate,
                 (pageBinding, pageList, pageIndex) -> {
-                    RecyclerView rv = pageBinding.rvPageGrid;
+                    RecyclerView rv = pageBinding.contentView;
                     rv.setLayoutManager(new GridLayoutManager(getContext(), mColumns));
 
                     // 内层渲染网格 Item

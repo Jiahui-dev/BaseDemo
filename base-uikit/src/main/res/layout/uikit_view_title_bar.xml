@@ -3,25 +3,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="50dp">
+    android:layout_height="@dimen/dp_50">
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/iv_back"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_marginStart="6dp"
-        app:srcCompat="@drawable/uikit_icon_back"
-        app:tint="#2C2C2C"
+        android:layout_width="@dimen/dp_20"
+        android:layout_height="@dimen/dp_20"
+        android:layout_marginStart="@dimen/dp_6"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/uikit_icon_back" />
 
     <TextView
         android:id="@+id/tv_center_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#333333"
-        android:textSize="18sp"
+        android:textColor="@color/uikit_text_primary"
+        android:textSize="@dimen/sp_18"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -34,7 +33,7 @@
         android:id="@+id/ll_right_custom_container"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_marginEnd="12dp"
+        android:layout_marginEnd="@dimen/dp_12"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -44,10 +43,10 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cl_search_group"
         android:layout_width="0dp"
-        android:layout_height="36dp"
-        android:layout_marginStart="6dp"
+        android:layout_height="@dimen/dp_36"
+        android:layout_marginStart="@dimen/dp_6"
         android:background="@drawable/uikit_shape_radius_25"
-        android:backgroundTint="@color/uikit_grey_dark"
+        android:backgroundTint="@color/uikit_grey_100"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/ll_right_custom_container"
         app:layout_constraintStart_toEndOf="@id/iv_back"
@@ -55,10 +54,9 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/iv_search_icon"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
-            android:layout_marginStart="8dp"
-            app:tint="#2C2C2C"
+            android:layout_width="@dimen/dp_18"
+            android:layout_height="@dimen/dp_18"
+            android:layout_marginStart="@dimen/dp_8"
             android:src="@drawable/uikit_icon_search"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -68,19 +66,12 @@
             android:id="@+id/ts_hint_text"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginStart="@dimen/dp_8"
+            android:layout_marginEnd="@dimen/dp_8"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/iv_search_icon"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-<!--    <View-->
-<!--        android:id="@+id/v_divider"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="0.5dp"-->
-<!--        android:background="#E5E5E5"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent" />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

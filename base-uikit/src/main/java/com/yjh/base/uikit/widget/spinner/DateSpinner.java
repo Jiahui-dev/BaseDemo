@@ -29,7 +29,7 @@ public class DateSpinner extends BaseSpinner {
 
     @Override
     protected int getLayoutId() {
-        return R.layout.uikit_view_date_spinner;
+        return R.layout.uikit_dialog_date_spinner;
     }
 
     @Override

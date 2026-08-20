@@ -28,7 +28,7 @@
             android:layout_marginStart="@dimen/dp_12"
             android:layout_weight="1"
             android:background="@drawable/uikit_shape_radius_20"
-            android:backgroundTint="@color/uikit_grey">
+            android:backgroundTint="@color/uikit_grey_100">
 
             <EditText
                 android:id="@+id/et_search"
@@ -58,7 +58,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dp_12"
             android:text="搜索"
-            android:textColor="@color/uikit_text_3" />
+            android:textColor="@color/uikit_text_primary" />
     </LinearLayout>
 
     <FrameLayout
@@ -117,7 +117,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="历史搜索"
-                        android:textColor="@color/uikit_text_3"
+                        android:textColor="@color/uikit_text_primary"
                         android:textSize="@dimen/sp_14"
                         android:textStyle="bold" />
 
@@ -127,7 +127,7 @@
                         android:layout_height="@dimen/dp_20"
                         android:layout_alignParentEnd="true"
                         android:padding="@dimen/dp_2"
-                        app:tint="@color/uikit_icon"
+                        app:tint="@color/uikit_grey_600"
                         android:src="@drawable/uikit_icon_delect" />
                 </RelativeLayout>
 

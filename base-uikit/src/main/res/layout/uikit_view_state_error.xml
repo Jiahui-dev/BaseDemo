@@ -6,33 +6,33 @@
     android:background="@android:color/transparent"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="32dp">
+    android:padding="@dimen/dp_32">
 
     <ImageView
         android:id="@+id/uikit_iv_error"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
+        android:layout_width="@dimen/dp_120"
+        android:layout_height="@dimen/dp_120"
         android:src="@drawable/uikit_pic_stub_network_error" />
 
     <TextView
         android:id="@+id/uikit_tv_error_msg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="@dimen/dp_16"
         android:text="网络或服务开小差了"
-        android:textColor="#666666"
-        android:textSize="15sp"
+        android:textColor="@color/uikit_text_secondary"
+        android:textSize="@dimen/sp_15"
         android:textStyle="bold" />
 
     <Button
         android:id="@+id/uikit_btn_retry"
-        android:layout_width="120dp"
-        android:layout_height="36dp"
-        android:layout_marginTop="24dp"
+        android:layout_width="@dimen/dp_120"
+        android:layout_height="@dimen/dp_36"
+        android:layout_marginTop="@dimen/dp_24"
         android:background="@drawable/uikit_shape_radius_25"
         android:backgroundTint="@color/uikit_blue_light"
         android:text="重新加载"
         android:textColor="@color/uikit_white"
-        android:textSize="14sp" />
+        android:textSize="@dimen/sp_14" />
 
 </LinearLayout>

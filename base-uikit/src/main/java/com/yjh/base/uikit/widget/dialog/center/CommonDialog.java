@@ -34,7 +34,7 @@ public class CommonDialog extends BaseDialog {
 
     @Override
     protected int getLayoutId() {
-        return R.layout.uikit_dialog_common;
+        return R.layout.uikit_dialog_tip;
     }
 
     @Override

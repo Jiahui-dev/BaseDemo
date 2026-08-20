@@ -54,7 +54,7 @@ public abstract class BaseFragment<VB extends ViewBinding> extends BaseCoreFragm
 
     protected View getTitleBarView() { return null; }
 
-    protected int getStatusBarColor() { return R.color.uikit_grey; }
+    protected int getStatusBarColor() { return R.color.uikit_grey_100; }
 
     protected boolean isStatusBarDarkFont() { return true; }
 
@@ -64,7 +64,7 @@ public abstract class BaseFragment<VB extends ViewBinding> extends BaseCoreFragm
 
         if (mLoadingDialog == null) {
             AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-            View view = LayoutInflater.from(mActivity).inflate(R.layout.uikit_view_dialog_loading, null);
+            View view = LayoutInflater.from(mActivity).inflate(R.layout.uikit_view_loading_bar, null);
             mTvLoadingMsg = view.findViewById(R.id.tv_dialogMsg);
             builder.setView(view);
             builder.setCancelable(false);

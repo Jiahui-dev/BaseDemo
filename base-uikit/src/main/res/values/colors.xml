@@ -2,15 +2,24 @@
 <resources>
     <color name="uikit_black">#FF000000</color>
     <color name="uikit_white">#FFFFFF</color>
-    <color name="uikit_grey_light">#F8F8F8</color>
-    <color name="uikit_grey">#F5F5F5</color>
-    <color name="uikit_grey_dark">#F3F3F3</color>
     <color name="uikit_blue">#42acff</color>
     <color name="uikit_blue_light">#69a6ff</color>
     <color name="uikit_green">#0fc161</color>
     <color name="uikit_icon">#2C2C2C</color>
 
-    <color name="uikit_text_3">#333333</color>
-    <color name="uikit_text_6">#666666</color>
-    <color name="uikit_text_9">#999999</color>
+    <color name="uikit_grey_100">#F5F5F5</color>    <!-- 页面背景 -->
+    <color name="uikit_grey_200">#EEEEEE</color>    <!-- 卡片背景、分割线 -->
+    <color name="uikit_grey_400">#BDBDBD</color>    <!-- 占位符、图标禁用 -->
+    <color name="uikit_grey_600">#757575</color>    <!-- 次要文字、Hint 文字 -->
+
+    <!-- 浅色主题 -->
+    <color name="uikit_text_primary">#DE000000</color>      <!-- 87% 黑，高强调度 -->
+    <color name="uikit_text_secondary">#99000000</color>    <!-- 60% 黑，中强调度 -->
+    <color name="uikit_text_hint">#61000000</color>         <!-- 38% 黑，低强调度/禁用 -->
+
+    <!-- 深色主题 -->
+    <color name="uikit_text_primary_dark">#FFFFFFFF</color>       <!-- 100% 白 -->
+    <color name="uikit_text_secondary_dark">#B3FFFFFF</color>     <!-- 70% 白 -->
+    <color name="uikit_text_hint_dark">#80FFFFFF</color>          <!-- 50% 白 -->
+
 </resources>

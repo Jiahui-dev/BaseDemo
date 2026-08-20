@@ -11,9 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 多分类网格弹窗
  * Created by jiahui on 2026/07/25
  */
-public class GridTabBottomDialog<T> extends BaseBottomDialog {
+public class MultiCategoryGridDialog<T> extends BaseBottomDialog {
 
     private TabLayout mTabLayout;
     private RecyclerView mRecyclerView;
@@ -48,13 +49,13 @@ public class GridTabBottomDialog<T> extends BaseBottomDialog {
         public List<T> getDataList() { return dataList; }
     }
 
-    public static <T> GridTabBottomDialog<T> newInstance(
+    public static <T> MultiCategoryGridDialog<T> newInstance(
             int columns,
             List<TabCategory<T>> categories,
             ItemBinder<T> binder,
             OnItemClickListener<T> listener) {
 
-        GridTabBottomDialog<T> dialog = new GridTabBottomDialog<>();
+        MultiCategoryGridDialog<T> dialog = new MultiCategoryGridDialog<>();
         dialog.mColumns = Math.max(1, columns);
         if (categories != null) dialog.mCategories.addAll(categories);
         dialog.mItemBinder = binder;
@@ -62,14 +63,14 @@ public class GridTabBottomDialog<T> extends BaseBottomDialog {
         return dialog;
     }
 
-    public GridTabBottomDialog<T> showTitle(boolean show) {
+    public MultiCategoryGridDialog<T> showTitle(boolean show) {
         this.mShowItemName = show;
         return this;
     }
 
     @Override
     protected int getLayoutId() {
-        return R.layout.uikit_dialog_grid_tab_panel;
+        return R.layout.uikit_dialog_grid_list;
     }
 
     @Override

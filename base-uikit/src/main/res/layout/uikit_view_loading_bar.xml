@@ -5,19 +5,19 @@
     android:background="@android:color/white"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:padding="20dp">
+    android:padding="@dimen/dp_20">
 
     <ProgressBar
-        android:layout_width="30dp"
-        android:layout_height="30dp" />
+        android:layout_width="@dimen/dp_30"
+        android:layout_height="@dimen/dp_30" />
 
     <TextView
         android:id="@+id/tv_dialogMsg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="@dimen/dp_16"
         android:text="加载中..."
-        android:textColor="#333333"
-        android:textSize="16sp" />
+        android:textColor="@color/uikit_text_primary"
+        android:textSize="@dimen/sp_16" />
 
 </LinearLayout>

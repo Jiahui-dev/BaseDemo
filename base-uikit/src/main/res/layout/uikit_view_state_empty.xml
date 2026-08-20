@@ -6,12 +6,12 @@
     android:background="@android:color/transparent"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="20dp">
+    android:padding="@dimen/dp_20">
 
     <ImageView
         android:id="@+id/uikit_iv_empty"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
+        android:layout_width="@dimen/dp_120"
+        android:layout_height="@dimen/dp_120"
         android:src="@drawable/uikit_pic_stub_empty" />
 
     <TextView
@@ -19,7 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="这里空空如也"
-        android:textColor="#999999"
-        android:textSize="15sp" />
+        android:textColor="@color/uikit_text_secondary"
+        android:textSize="@dimen/sp_15" />
 
 </LinearLayout>

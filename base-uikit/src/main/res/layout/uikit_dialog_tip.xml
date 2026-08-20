@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dp_24"
             android:text="提示"
-            android:textColor="@color/uikit_text_6"
+            android:textColor="@color/uikit_text_secondary"
             android:textSize="@dimen/sp_24"
             android:textStyle="bold" />
 
@@ -32,7 +32,7 @@
             android:layout_marginBottom="@dimen/dp_8"
             android:lineSpacingExtra="@dimen/dp_4"
             android:text="弹窗的具体内容"
-            android:textColor="@color/uikit_text_6"
+            android:textColor="@color/uikit_text_secondary"
             android:textSize="@dimen/sp_15" />
 
         <LinearLayout
@@ -57,7 +57,7 @@
                 android:paddingTop="@dimen/dp_24"
                 android:paddingBottom="@dimen/dp_24"
                 android:text="取消"
-                android:textColor="@color/uikit_text_6"
+                android:textColor="@color/uikit_text_secondary"
                 android:textSize="@dimen/sp_16" />
 
             <TextView
@@ -69,7 +69,7 @@
                 android:paddingTop="@dimen/dp_24"
                 android:paddingBottom="@dimen/dp_24"
                 android:text="确定"
-                android:textColor="@color/uikit_text_6"
+                android:textColor="@color/uikit_text_secondary"
                 android:textSize="@dimen/sp_16" />
         </LinearLayout>
 

@@ -69,7 +69,7 @@ public class EditInfoDialog extends BaseBottomDialog {
 
     @Override
     protected int getLayoutId() {
-        return R.layout.uikit_dialog_edit_info;
+        return R.layout.uikit_dialog_input_bottom;
     }
 
     @Override

@@ -56,12 +56,12 @@ public class ListSelectDialog<T> extends BaseDialog {
 
     @Override
     protected int getLayoutId() {
-        return R.layout.uikit_dialog_list;
+        return R.layout.uikit_layout_list;
     }
 
     protected void initView(View root) {
-        TextView tvTitle = root.findViewById(R.id.tv_dialog_title);
-        RecyclerView rvList = root.findViewById(R.id.rv_dialog_list);
+        TextView tvTitle = root.findViewById(R.id.title);
+        RecyclerView rvList = root.findViewById(R.id.contentView);
 
         if (!TextUtils.isEmpty(mTitle)) {
             tvTitle.setText(mTitle);

@@ -39,7 +39,7 @@ public abstract class BaseActivity<VB extends ViewBinding> extends BaseCoreActiv
     }
 
     protected View getTopView() { return null; }
-    protected int getStatusBarColor() { return R.color.uikit_grey; }
+    protected int getStatusBarColor() { return R.color.uikit_grey_100; }
     protected boolean isStatusBarDarkFont() { return true; }
 
     protected void initImmersionBar() {
@@ -56,7 +56,7 @@ public abstract class BaseActivity<VB extends ViewBinding> extends BaseCoreActiv
     public void showLoading(String msg) {
         if (mLoadingDialog == null) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            View view = LayoutInflater.from(this).inflate(R.layout.uikit_view_dialog_loading, null);
+            View view = LayoutInflater.from(this).inflate(R.layout.uikit_view_loading_bar, null);
             mTvLoadingMsg = view.findViewById(R.id.tv_dialogMsg);
             builder.setView(view);
             builder.setCancelable(false);
