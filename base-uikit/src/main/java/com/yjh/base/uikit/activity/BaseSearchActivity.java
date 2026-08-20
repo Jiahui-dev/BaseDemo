@@ -50,18 +50,6 @@ public abstract class BaseSearchActivity<T> extends BaseRecyclerActivity<T, Uiki
     }
 
     @Override
-    public void initView() {
-        super.initView();
-
-        // 绑定搜索结果点击事件
-        if (mAdapter != null) {
-            mAdapter.setOnItemClickListener((view, viewId, position, data) -> {
-                onSearchResultClick(data, position);
-            });
-        }
-    }
-
-    @Override
     public void initListener() {
         super.initListener();
 
@@ -274,9 +262,6 @@ public abstract class BaseSearchActivity<T> extends BaseRecyclerActivity<T, Uiki
 
     protected String getHistoryKey() {
         return "common_search_history";
-    }
-
-    protected void onSearchResultClick(T item, int position) {
     }
 
     @Override
