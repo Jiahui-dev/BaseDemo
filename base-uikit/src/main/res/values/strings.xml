@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="uikit_search_hint">请输入搜索关键字</string>
+    <string name="uikit_search_action">搜索</string>
+    <string name="uikit_search_history_title">历史搜索</string>
+    <string name="uikit_tip">提示</string>
+    <string name="uikit_delete_history_content">确认删除历史记录吗？</string>
+    <string name="uikit_loading_...">正在加载……</string>
+    <string name="uikit_already_at_bottom">已经到底啦</string>
+    <string name="uikit_loading_failed">加载失败，点击重试</string>
+</resources>

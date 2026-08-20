@@ -5,12 +5,15 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
+
 import androidx.annotation.Nullable;
 import androidx.viewbinding.ViewBinding;
+
 import com.gyf.immersionbar.ImmersionBar;
 import com.yjh.base.core.activity.BaseCoreActivity;
 import com.yjh.base.uikit.R;
 import com.yjh.base.utils.util.ToastUtils;
+
 import java.util.Objects;
 
 /**
@@ -38,9 +41,17 @@ public abstract class BaseActivity<VB extends ViewBinding> extends BaseCoreActiv
 
     }
 
-    protected View getTopView() { return null; }
-    protected int getStatusBarColor() { return R.color.uikit_grey_100; }
-    protected boolean isStatusBarDarkFont() { return true; }
+    protected View getTopView() {
+        return null;
+    }
+
+    protected int getStatusBarColor() {
+        return R.color.uikit_grey_100;
+    }
+
+    protected boolean isStatusBarDarkFont() {
+        return true;
+    }
 
     protected void initImmersionBar() {
         ImmersionBar.with(this)
@@ -102,6 +113,7 @@ public abstract class BaseActivity<VB extends ViewBinding> extends BaseCoreActiv
             if (view != null) {
                 view.setOnClickListener(new View.OnClickListener() {
                     private long lastClickTime = 0;
+
                     @Override
                     public void onClick(View v) {
                         long currentTime = System.currentTimeMillis();

@@ -1,4 +1,4 @@
-package com.yjh.base.core.model.event;
+package com.yjh.base.core.event.hub;
 
 import android.os.Handler;
 import android.os.Looper;

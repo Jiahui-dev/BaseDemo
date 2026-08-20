@@ -17,11 +17,11 @@ public class BaseViewHolder<VB extends ViewBinding> extends RecyclerView.ViewHol
 
     public BaseViewHolder(@NonNull VB binding) {
         super(binding.getRoot());
-        this.binding=binding;
+        this.binding = binding;
     }
 
     /**
-     * 针对原生 View (如 EmptyView, ErrorView) 的构造函数
+     * 原生 View (如 EmptyView, ErrorView) 的构造函数
      */
     public BaseViewHolder(@NonNull View itemView) {
         super(itemView);

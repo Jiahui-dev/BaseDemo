@@ -6,9 +6,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
 import com.yjh.base.core.annotation.InjectPresenter;
 import com.yjh.base.core.contract.IBasePresenter;
 import com.yjh.base.core.contract.IBaseView;
@@ -16,6 +18,7 @@ import com.yjh.base.core.lifecycle.Lifecycle;
 import com.yjh.base.core.lifecycle.LifecycleEvent;
 import com.yjh.base.core.router.BaseRouter;
 import com.yjh.base.utils.util.LogUtils;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -24,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import androidx.viewbinding.ViewBinding;
 
 /**
@@ -204,7 +208,7 @@ public abstract class BaseCoreFragment<VB extends ViewBinding> extends Fragment 
                         mPresenterList.add(presenter);
                     }
                 } catch (Exception e) {
-                    LogUtils.error("@InjectPresenter 失败：", e);
+                    LogUtils.error(TAG,"@InjectPresenter 失败："+e);
                 }
             }
         }

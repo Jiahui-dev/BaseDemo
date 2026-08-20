@@ -84,7 +84,6 @@ public class SimpleAdapter<T, VB extends ViewBinding> extends RecyclerView.Adapt
     // 设置空状态 View
     public void setEmptyView(View emptyView) {
         this.mEmptyView = emptyView;
-        Log.d(TAG, "setEmptyView: emptyView 是否为空 -> " + (emptyView == null));
     }
 
     // 设置错误状态 View
@@ -95,7 +94,6 @@ public class SimpleAdapter<T, VB extends ViewBinding> extends RecyclerView.Adapt
     // 切换为显示空页面
     public void showEmpty() {
         this.mPageState = 1;
-        Log.d(TAG, "showEmpty() 被调用，当前 mPageState 已置为 1, mEmptyView 是否存在 -> " + (mEmptyView != null));
         notifyDataSetChanged();
     }
 
@@ -129,12 +127,12 @@ public class SimpleAdapter<T, VB extends ViewBinding> extends RecyclerView.Adapt
         LayoutInflater inflater = LayoutInflater.from(mContext);
 
         if (viewType == TYPE_EMPTY) {
-            setFullMatchLayout(mEmptyView,parent);
+            setFullMatchLayout(mEmptyView, parent);
             return new BaseViewHolder<>(mEmptyView);
         }
 
         if (viewType == TYPE_ERROR) {
-            setFullMatchLayout(mErrorView,parent);
+            setFullMatchLayout(mErrorView, parent);
             mErrorView.setOnClickListener(v -> {
                 if (mOnRetryListener != null) {
                     mOnRetryListener.onRetry();
@@ -160,7 +158,7 @@ public class SimpleAdapter<T, VB extends ViewBinding> extends RecyclerView.Adapt
         if (viewType == TYPE_ERROR) {
 
             TextView tvErrorMsg = holder.itemView.findViewById(R.id.uikit_tv_error_msg);
-            View btnRetry =  holder.itemView.findViewById(R.id.uikit_btn_retry);
+            View btnRetry = holder.itemView.findViewById(R.id.uikit_btn_retry);
 
             if (tvErrorMsg != null && !TextUtils.isEmpty(mCustomErrorMsg)) {
                 tvErrorMsg.setText(mCustomErrorMsg);
@@ -383,7 +381,7 @@ public class SimpleAdapter<T, VB extends ViewBinding> extends RecyclerView.Adapt
                 footerBinding.getRoot().setVisibility(View.VISIBLE);
                 footerBinding.pbLoading.setVisibility(View.VISIBLE);
                 footerBinding.tvLoading.setVisibility(View.VISIBLE);
-                footerBinding.tvLoading.setText("正在加载...");
+                footerBinding.tvLoading.setText(R.string.uikit_loading____);
                 footerBinding.getRoot().setOnClickListener(null);
                 break;
 
@@ -391,7 +389,7 @@ public class SimpleAdapter<T, VB extends ViewBinding> extends RecyclerView.Adapt
                 footerBinding.getRoot().setVisibility(View.VISIBLE);
                 footerBinding.pbLoading.setVisibility(View.GONE);
                 footerBinding.tvLoading.setVisibility(View.VISIBLE);
-                footerBinding.tvLoading.setText("已经到底啦");
+                footerBinding.tvLoading.setText(R.string.uikit_already_at_bottom);
                 footerBinding.getRoot().setOnClickListener(null);
                 break;
 
@@ -399,7 +397,7 @@ public class SimpleAdapter<T, VB extends ViewBinding> extends RecyclerView.Adapt
                 footerBinding.getRoot().setVisibility(View.VISIBLE);
                 footerBinding.pbLoading.setVisibility(View.GONE);
                 footerBinding.tvLoading.setVisibility(View.VISIBLE);
-                footerBinding.tvLoading.setText("加载失败，点击重试");
+                footerBinding.tvLoading.setText(R.string.uikit_loading_failed);
                 footerBinding.getRoot().setOnClickListener(v -> {
                     if (mOnFooterRetryListener != null) {
                         mOnFooterRetryListener.onRetry();

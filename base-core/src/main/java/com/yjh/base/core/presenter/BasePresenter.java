@@ -2,10 +2,12 @@ package com.yjh.base.core.presenter;
 
 import com.yjh.base.core.contract.IBasePresenter;
 import com.yjh.base.core.contract.IBaseView;
+
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
@@ -21,12 +23,12 @@ public class BasePresenter<V extends IBaseView> implements IBasePresenter<V> {
     @Override
     @SuppressWarnings("unchecked")
     public void attachView(V view) {
-        mViewRef=new WeakReference<>(view);
-        mCompositeDisposable=new CompositeDisposable();
+        mViewRef = new WeakReference<>(view);
+        mCompositeDisposable = new CompositeDisposable();
 
         //当 View 被销毁后，调用 View 的方法不会空指针，而是直接“空过”
-        MvpViewHandler viewHandler=new MvpViewHandler(mViewRef);
-        mProxyView=(V) Proxy.newProxyInstance(
+        MvpViewHandler viewHandler = new MvpViewHandler(mViewRef);
+        mProxyView = (V) Proxy.newProxyInstance(
                 view.getClass().getClassLoader(),
                 view.getClass().getInterfaces(),
                 viewHandler
@@ -36,20 +38,21 @@ public class BasePresenter<V extends IBaseView> implements IBasePresenter<V> {
     @Override
     public void detachView() {
         //1.取消所有正在进行的 RxJava 任务
-        if(mCompositeDisposable!=null){
+        if (mCompositeDisposable != null) {
             mCompositeDisposable.clear();
         }
 
         //2.释放 View 引用
         if (mViewRef != null) {
             mViewRef.clear();
-            mViewRef=null;
+            mViewRef = null;
         }
-        mProxyView=null;
+        mProxyView = null;
     }
 
     /**
      * 子类永远调用这个方法来获取 View
+     *
      * @return 代理后的 View，绝不会为 null
      */
     @Override
@@ -60,8 +63,8 @@ public class BasePresenter<V extends IBaseView> implements IBasePresenter<V> {
     /**
      * 将 RxJava 的 Disposable 添加到管理列表
      */
-    protected void addDisposable(Disposable disposable){
-        if(mCompositeDisposable!=null){
+    protected void addDisposable(Disposable disposable) {
+        if (mCompositeDisposable != null) {
             mCompositeDisposable.add(disposable);
         }
     }

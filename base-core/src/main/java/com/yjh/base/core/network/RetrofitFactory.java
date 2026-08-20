@@ -1,9 +1,12 @@
 package com.yjh.base.core.network;
 
 import androidx.annotation.NonNull;
+
 import com.yjh.base.utils.config.AppConfig;
 import com.yjh.base.utils.util.LogUtils;
+
 import java.util.concurrent.TimeUnit;
+
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 

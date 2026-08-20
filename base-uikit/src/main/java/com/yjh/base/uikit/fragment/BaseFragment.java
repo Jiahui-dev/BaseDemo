@@ -4,11 +4,14 @@ import android.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
+
 import androidx.viewbinding.ViewBinding;
+
 import com.gyf.immersionbar.ImmersionBar;
 import com.yjh.base.core.fragment.BaseCoreFragment;
 import com.yjh.base.uikit.R;
 import com.yjh.base.utils.util.ToastUtils;
+
 import java.util.Objects;
 
 /**
@@ -18,7 +21,7 @@ import java.util.Objects;
  */
 public abstract class BaseFragment<VB extends ViewBinding> extends BaseCoreFragment<VB> {
 
-    private static final String TAG="BaseFragment";
+    private static final String TAG = "BaseFragment";
 
     private AlertDialog mLoadingDialog;
 
@@ -52,11 +55,17 @@ public abstract class BaseFragment<VB extends ViewBinding> extends BaseCoreFragm
                 .init();
     }
 
-    protected View getTitleBarView() { return null; }
+    protected View getTitleBarView() {
+        return null;
+    }
 
-    protected int getStatusBarColor() { return R.color.uikit_grey_100; }
+    protected int getStatusBarColor() {
+        return R.color.uikit_grey_100;
+    }
 
-    protected boolean isStatusBarDarkFont() { return true; }
+    protected boolean isStatusBarDarkFont() {
+        return true;
+    }
 
     @Override
     public void showLoading(String msg) {

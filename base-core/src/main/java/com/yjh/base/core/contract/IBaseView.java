@@ -7,7 +7,6 @@ import android.app.Activity;
  * 这里可以定义通用的 UI 操作
  * Created by jiahui on 2026/01/28
  */
-
 public interface IBaseView {
 
     //方便 Presenter 中使用 Context

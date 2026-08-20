@@ -5,10 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
+
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
 import com.yjh.base.core.annotation.IntentParam;
 import com.yjh.base.utils.util.LogUtils;
+
 import java.io.Serializable;
 import java.lang.reflect.Field;
 
@@ -17,18 +20,19 @@ import java.lang.reflect.Field;
  */
 public class BaseRouter {
 
-    private static final String TAG="BaseRouter";
+    private static final String TAG = "BaseRouter";
 
-    private BaseRouter(){}
+    private BaseRouter() {
+    }
 
-    private static class InstanceHolder{
-        private static final BaseRouter INSTANCE=new BaseRouter();
+    private static class InstanceHolder {
+        private static final BaseRouter INSTANCE = new BaseRouter();
     }
 
     /**
      * 获取单例实例
      */
-    public static BaseRouter getInstance(){
+    public static BaseRouter getInstance() {
         return InstanceHolder.INSTANCE;
     }
 
@@ -88,17 +92,17 @@ public class BaseRouter {
     /**
      * 获取跳转建造者（传入强类型契约）
      */
-    public <T extends Activity> Postcard<T> build(IRoutePath<T> routePath){
+    public <T extends Activity> Postcard<T> build(IRoutePath<T> routePath) {
         if (routePath == null || routePath.getTargetClass() == null) {
             throw new IllegalArgumentException("路由目标Class不能为空！");
         }
         return new Postcard<>(routePath.getTargetClass());
     }
 
-    public <T extends Activity> void navigation(Context context,Postcard<T> postcard){
-        Class<T> targetClass=postcard.getTargetClass();
+    public <T extends Activity> void navigation(Context context, Postcard<T> postcard) {
+        Class<T> targetClass = postcard.getTargetClass();
 
-        Intent intent=new Intent(context,targetClass);
+        Intent intent = new Intent(context, targetClass);
         intent.putExtras(postcard.getBundle());
         if (postcard.getFlags() != -1) {
             intent.setFlags(postcard.getFlags());
@@ -109,36 +113,36 @@ public class BaseRouter {
         context.startActivity(intent);
     }
 
-    public static class Postcard<T extends Activity>{
+    public static class Postcard<T extends Activity> {
         private final Class<T> targetClass;
-        private final Bundle bundle=new Bundle();
-        private int flags=-1;
+        private final Bundle bundle = new Bundle();
+        private int flags = -1;
 
-        public Postcard(Class<T> targetClass){
-            this.targetClass=targetClass;
+        public Postcard(Class<T> targetClass) {
+            this.targetClass = targetClass;
         }
 
-        public Class<T> getTargetClass(){
+        public Class<T> getTargetClass() {
             return targetClass;
         }
 
-        public Bundle getBundle(){
+        public Bundle getBundle() {
             return bundle;
         }
 
-        public int getFlags(){
+        public int getFlags() {
             return flags;
         }
 
-        public Postcard<T> with(Bundle extras){
+        public Postcard<T> with(Bundle extras) {
             if (extras != null) {
                 this.bundle.putAll(extras);
             }
             return this;
         }
 
-        public Postcard<T> withString(String key,String value){
-            bundle.putString(key,value);
+        public Postcard<T> withString(String key, String value) {
+            bundle.putString(key, value);
             return this;
         }
 

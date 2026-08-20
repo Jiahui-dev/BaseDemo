@@ -38,7 +38,7 @@ public class GlobalLeakMonitor implements Application.ActivityLifecycleCallbacks
     public static void init(Application application) {
         if (application != null) {
             application.registerActivityLifecycleCallbacks(new GlobalLeakMonitor());
-            LogUtils.debug(TAG, "GlobalLeakMonitor 启动成功，全自动内存泄漏监控已就位。");
+            LogUtils.debug(TAG, "GlobalLeakMonitor 启动成功");
         }
     }
 
@@ -126,9 +126,23 @@ public class GlobalLeakMonitor implements Application.ActivityLifecycleCallbacks
     }
 
     // 生命周期空实现
-    @Override public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {}
-    @Override public void onActivityStarted(@NonNull Activity activity) {}
-    @Override public void onActivityPaused(@NonNull Activity activity) {}
-    @Override public void onActivityStopped(@NonNull Activity activity) {}
-    @Override public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {}
+    @Override
+    public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
+    }
+
+    @Override
+    public void onActivityStarted(@NonNull Activity activity) {
+    }
+
+    @Override
+    public void onActivityPaused(@NonNull Activity activity) {
+    }
+
+    @Override
+    public void onActivityStopped(@NonNull Activity activity) {
+    }
+
+    @Override
+    public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {
+    }
 }

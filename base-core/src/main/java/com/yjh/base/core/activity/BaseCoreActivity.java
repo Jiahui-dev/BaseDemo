@@ -3,9 +3,11 @@ package com.yjh.base.core.activity;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewbinding.ViewBinding;
+
 import com.yjh.base.core.annotation.InjectPresenter;
 import com.yjh.base.core.contract.IBasePresenter;
 import com.yjh.base.core.contract.IBaseView;
@@ -13,10 +15,8 @@ import com.yjh.base.core.lifecycle.Lifecycle;
 import com.yjh.base.core.lifecycle.LifecycleEvent;
 import com.yjh.base.core.router.BaseRouter;
 import com.yjh.base.utils.util.LogUtils;
+
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,7 +47,7 @@ public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompat
         if (binding != null) {
             setContentView(binding.getRoot());
         } else {
-            LogUtils.error(TAG,"ViewBinding 绑定失败，请检查 onBindingInflate 实现！");
+            LogUtils.error(TAG, "ViewBinding 绑定失败");
         }
 
         // 让子类在这个时机去注册它需要的 Controller（此时布局已经塞进去了，可以放心拿 rootView）
@@ -133,7 +133,7 @@ public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompat
     protected void initListener() {
     }
 
-    protected void initEvent(){
+    protected void initEvent() {
     }
 
     protected void initData() {
@@ -201,7 +201,7 @@ public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompat
                         mPresenterList.add(presenter);
                     }
                 } catch (Exception e) {
-                    LogUtils.error("@InjectPresenter 失败：", e);
+                    LogUtils.error(TAG,"@InjectPresenter 失败："+e);
                 }
             }
         }
