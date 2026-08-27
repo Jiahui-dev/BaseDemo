@@ -22,7 +22,7 @@ public class WheelView extends View {
     private Scroller scroller;
     private VelocityTracker velocityTracker;
     private OnItemSelectedListener listener;
-    private int itemHeight; // 不要在这里写死 120
+    private int itemHeight;
 
     public interface OnItemSelectedListener {
         void onSelected(int index);
@@ -30,7 +30,6 @@ public class WheelView extends View {
 
     public WheelView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        // 将 50dp 转换为当前设备的像素值，这样在所有手机上看起来高度都差不多
         float density = context.getResources().getDisplayMetrics().density;
         itemHeight = (int) (50 * density); // 50dp 是比较标准的滚轮高度
 
