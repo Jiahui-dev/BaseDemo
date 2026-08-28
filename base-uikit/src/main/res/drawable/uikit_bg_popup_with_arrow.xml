@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 1. 底部主体：圆角矩形 -->
+    <item
+        android:top="12dp"> <!-- 给顶部的倒三角留出空间，值等于倒三角的高度 -->
+        <shape android:shape="rectangle">
+            <solid android:color="@color/uikit_white" /> <!-- 填充颜色 -->
+            <stroke
+                android:width="1dp"
+                android:color="#E0E0E0" /> <!-- 边框颜色，可按需修改 -->
+            <corners android:radius="8dp" /> <!-- 圆角 -->
+        </shape>
+    </item>
+
+    <!-- 2. 顶部的倒三角 -->
+    <!-- 通过设置 left="20dp" 来控制三角相对于 Popup 左侧的位置 -->
+    <item
+        android:width="16dp"
+        android:height="16dp"
+        android:gravity="top|left"
+        android:left="20dp">
+        <rotate
+            android:fromDegrees="45"
+            android:pivotX="-40%"
+            android:pivotY="80%"
+            android:toDegrees="45">
+            <shape android:shape="rectangle">
+                <solid android:color="@color/uikit_white" /> <!-- 颜色需与主体保持一致 -->
+                <stroke
+                    android:width="1dp"
+                    android:color="#E0E0E0" /> <!-- 边框颜色需与主体保持一致 -->
+            </shape>
+        </rotate>
+    </item>
+
+</layer-list>

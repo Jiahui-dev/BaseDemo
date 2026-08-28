@@ -18,8 +18,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dp_24"
             android:text="提示"
-            android:textColor="@color/uikit_text_secondary"
-            android:textSize="@dimen/sp_24"
+            android:textColor="@color/uikit_text_primary"
+            android:textSize="@dimen/sp_22"
             android:textStyle="bold" />
 
         <TextView

@@ -1,4 +1,4 @@
-package com.yjh.base.uikit.widget.popup;//package com.leben.base.widget.popup;
+//package com.yjh.base.uikit.widget.popup;
 //
 //import android.content.Context;
 //import android.graphics.Color;
@@ -7,9 +7,6 @@ package com.yjh.base.uikit.widget.popup;//package com.leben.base.widget.popup;
 //import android.view.ViewGroup;
 //import android.widget.LinearLayout;
 //import android.widget.TextView;
-//
-//import com.leben.base.R;
-//import com.leben.base.model.bean.PopupEntity;
 //import java.util.List;
 //
 //public class IconPopup extends BaseCustomPopup {

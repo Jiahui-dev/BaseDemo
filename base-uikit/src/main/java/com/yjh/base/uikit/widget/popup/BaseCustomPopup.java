@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -26,23 +27,20 @@ public abstract class BaseCustomPopup<T> extends PopupWindow {
     private void init() {
         container = new LinearLayout(context);
         container.setOrientation(LinearLayout.VERTICAL);
-        container.setBackgroundResource(R.drawable.uikit_bg_popup_white); // 你的默认背景
+        container.setBackgroundResource(R.drawable.uikit_shape_radius_12); // 你的默认背景
 
-        int p = dip2px(8);
-        container.setPadding(p, p, p, p);
+        container.setPadding(0, 0, 0, 0);
 
         // 由子类实现具体布局填充
         renderItems();
 
         setContentView(container);
-        setWidth(dip2px(150));
+        setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
         setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
         setFocusable(true);
         setOutsideTouchable(true);
         setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            setElevation(10f);
-        }
+        setElevation(10f);
     }
 
     // 子类必须实现此方法，负责向 container 中添加视图
@@ -63,4 +61,38 @@ public abstract class BaseCustomPopup<T> extends PopupWindow {
         this.listener = l;
         return this;
     }
+
+    /**
+     * 在锚点控件（Anchor）下方水平居中显示
+     * @param anchor 目标控件
+     */
+    public void showAtAnchorCenter(View anchor) {
+        showAtAnchorCenter(anchor, 0);
+    }
+
+    /**
+     * 在锚点控件（Anchor）下方水平居中显示，并支持设置 Y 轴偏移量
+     * @param anchor 目标控件
+     * @param yoff Y 轴偏移量（单位：px）
+     */
+    public void showAtAnchorCenter(View anchor, int yoff) {
+        if (anchor == null) return;
+
+        // 1. 强制测量 ContentView，确保获取到精准的 Popup 宽度
+        getContentView().measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        );
+        int popupWidth = getContentView().getMeasuredWidth();
+
+        // 2. 获取锚点控件的宽度
+        int anchorWidth = anchor.getWidth();
+
+        // 3. 计算水平居中的 X 轴偏移量
+        int xoff = (anchorWidth - popupWidth) / 2;
+
+        // 4. 调用原生方法展示
+        showAsDropDown(anchor, xoff, yoff);
+    }
+
 }
