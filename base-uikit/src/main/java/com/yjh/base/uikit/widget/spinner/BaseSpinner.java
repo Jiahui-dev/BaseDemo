@@ -15,7 +15,7 @@ import com.yjh.base.uikit.R;
 public abstract class BaseSpinner {
     protected Context context;
     protected Dialog dialog;
-    protected OnSpinnerSelectedListener listener;
+    protected OnDateSelectedListener listener;
 
     public BaseSpinner(Context context) {
         this.context = context;
@@ -38,7 +38,7 @@ public abstract class BaseSpinner {
 
     protected abstract void initView(View rootView);
 
-    public void setOnSelectedListener(OnSpinnerSelectedListener listener) {
+    public void setOnSelectedListener(OnDateSelectedListener listener) {
         this.listener = listener;
     }
 
