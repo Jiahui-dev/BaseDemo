@@ -1,121 +1,105 @@
-package com.yjh.base.core.activity;
+package com.yjh.base.core.activity
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.viewbinding.ViewBinding;
-
-import com.yjh.base.core.annotation.InjectPresenter;
-import com.yjh.base.core.contract.IBasePresenter;
-import com.yjh.base.core.contract.IBaseView;
-import com.yjh.base.core.lifecycle.Lifecycle;
-import com.yjh.base.core.lifecycle.LifecycleEvent;
-import com.yjh.base.core.router.BaseRouter;
-import com.yjh.base.utils.util.LogUtils;
-
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import android.app.Activity
+import android.os.Bundle
+import android.view.LayoutInflater
+import androidx.appcompat.app.AppCompatActivity
+import androidx.viewbinding.ViewBinding
+import com.yjh.base.core.annotation.InjectPresenter
+import com.yjh.base.core.contract.IBasePresenter
+import com.yjh.base.core.contract.IBaseView
+import com.yjh.base.core.lifecycle.Lifecycle
+import com.yjh.base.core.lifecycle.LifecycleEvent
+import com.yjh.base.core.router.BaseRouter
+import com.yjh.base.utils.util.LogUtils
 
 /**
  * 逻辑基类，管理 Presenter 和 Controller 生命周期的 Activity 基类，基于“组合优于继承”思想
- * Created by jiahui on 2026/07/11
+ * Created by youjiahui on 2026/10/5
  */
-public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompatActivity implements IBaseView {
+abstract class BaseCoreActivity<VB : ViewBinding> : AppCompatActivity(), IBaseView {
 
-    private static final String TAG = "BaseCoreActivity";
+    private val TAG: String = "BaseCoreActivity"
 
-    protected VB binding;
+    protected var binding: VB? = null
 
-    //存放所有自动注入的Presenter
-    private final List<IBasePresenter> mPresenterList = new ArrayList<>();
+    private val mPresenterList = ArrayList<IBasePresenter<*>>()
 
-    //核心“排插插槽”
-    private final Map<String, Lifecycle> mControllers = new HashMap<>();
+    private val mControllers = HashMap<String, Lifecycle>()
 
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
         // 非反射的初始化方法
-        binding = initBinding(getLayoutInflater());
-        if (binding != null) {
-            setContentView(binding.getRoot());
-        } else {
-            LogUtils.error(TAG, "ViewBinding 绑定失败");
-        }
+        binding = initBinding(LayoutInflater.from(this))
+        binding?.let {
+            setContentView(it.root)
+        } ?: LogUtils.error(TAG, "ViewBinding 绑定失败")
 
         // 让子类在这个时机去注册它需要的 Controller（此时布局已经塞进去了，可以放心拿 rootView）
-        onRegisterControllers();
+        onRegisterControllers()
 
         // 路由注入与 Presenter 自动绑定
-        BaseRouter.getInstance().inject(this);
-        injectPresenters();
+        BaseRouter.inject(this)
+        injectPresenters()
 
         // 驱动状态机：内存初始化就绪
-        dispatchLifecycleEvent(LifecycleEvent.ON_INIT);
+        dispatchLifecycleEvent(LifecycleEvent.ON_INIT)
 
         // Activity 自身的 View 初始化
-        initView();
+        initView()
         // 驱动状态机：通知所有插件——View 已经绑定完毕！
         // 此时 Controller 内部的 case ON_VIEW_CREATED 绝对可以安全地拿到各个控件！
-        dispatchLifecycleEvent(LifecycleEvent.ON_VIEW_CREATED);
+        dispatchLifecycleEvent(LifecycleEvent.ON_VIEW_CREATED)
 
         // 专门处理本地控件点击事件
-        initListener();
+        initListener()
         // 专门处理全局、跨组件消息
-        initEvent();
-        initData();
+        initEvent()
+        initData()
         // 驱动状态机：数据流就绪
-        dispatchLifecycleEvent(LifecycleEvent.ON_DATA_INIT);
+        dispatchLifecycleEvent(LifecycleEvent.ON_DATA_INIT)
 
-    }
-
-    protected <T extends Lifecycle> void registerController(Class<T> clazz, T controller) {
-        if (clazz != null) {
-            registerController(clazz.getName(), controller);
-        }
     }
 
     /**
      * 供子类调用：往插排上“插插件”
      */
-    protected void registerController(String key, Lifecycle controller) {
-        if (controller != null && !mControllers.containsKey(key)) {
-            mControllers.put(key, controller);
+    protected fun registerController(key: String, controller: Lifecycle) {
+        if (!mControllers.containsKey(key)) {
+            mControllers[key] = controller
+        }
+    }
+
+    protected fun <T : Lifecycle> registerController(clazz: Class<T>?, controller: T) {
+        if (clazz != null) {
+            registerController(clazz.name, controller)
         }
     }
 
     /**
      * 供子类调用：可以通过 Key 拿到具体的插件实例（比如在 Activity 里控制加载 Footer 的样式）
      */
-    @SuppressWarnings("unchecked")
-    protected <T extends Lifecycle> T getController(String key) {
-        return (T) mControllers.get(key);
+    @Suppress("UNCHECKED_CAST")
+    protected fun <T : Lifecycle> getController(key: String): T? {
+        return mControllers[key] as? T
     }
 
     /**
      * 供子类调用：根据 Class 拿到具体的插件实例
      */
-    @SuppressWarnings("unchecked")
-    protected <T extends Lifecycle> T getController(Class<T> clazz) {
-        if (clazz == null) return null;
-        return (T) getController(clazz.getName());
+    @Suppress("UNCHECKED_CAST")
+    protected fun <T : Lifecycle> getController(clazz: Class<T>?): T? {
+        if (clazz == null) return null
+        return getController<Lifecycle>(clazz.name) as T
     }
 
     /**
      * 分发逻辑：遍历所有控制器，驱动他们的状态机流转
      */
-    private void dispatchLifecycleEvent(LifecycleEvent event) {
-        for (Lifecycle controller : mControllers.values()) {
-            if (controller != null) {
-                controller.onLifecycleChanged(event);
-            }
+    private fun dispatchLifecycleEvent(event: LifecycleEvent) {
+        mControllers.values.forEach { controller ->
+            controller.onLifecycleChanged(event)
         }
     }
 
@@ -123,49 +107,44 @@ public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompat
      * 在这里子类可以写：setContentView(R.layout.activity_main);
      * 或者写 ViewBinding 的加载。
      */
-    protected abstract void onRegisterControllers();
+    protected abstract fun onRegisterControllers()
 
-    protected abstract VB initBinding(LayoutInflater inflater);
+    protected abstract fun initBinding(inflater: LayoutInflater): VB
 
-    protected void initView() {
+    protected fun initView() {}
+
+    protected fun initListener() {}
+
+    protected fun initEvent() {}
+
+    protected fun initData() {}
+
+    override fun onStart() {
+        super.onStart()
+        dispatchLifecycleEvent(LifecycleEvent.ON_START)
     }
 
-    protected void initListener() {
+    override fun onResume() {
+        super.onResume()
+        dispatchLifecycleEvent(LifecycleEvent.ON_RESUME)
     }
 
-    protected void initEvent() {
+    override fun onPause() {
+        super.onPause()
+        dispatchLifecycleEvent(LifecycleEvent.ON_PAUSE)
     }
 
-    protected void initData() {
+    override fun onStop() {
+        super.onStop()
+        dispatchLifecycleEvent(LifecycleEvent.ON_STOP)
     }
 
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        dispatchLifecycleEvent(LifecycleEvent.ON_START);
+    override fun getActivityContext(): Activity {
+        return this
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        dispatchLifecycleEvent(LifecycleEvent.ON_RESUME);
-    }
+    override fun onDestroy() {
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        dispatchLifecycleEvent(LifecycleEvent.ON_PAUSE);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        dispatchLifecycleEvent(LifecycleEvent.ON_STOP);
-    }
-
-    @Override
-    protected void onDestroy() {
         // 通知所有控制器进行最后的销毁和内存清理
         dispatchLifecycleEvent(LifecycleEvent.ON_DESTROY);
 
@@ -173,35 +152,32 @@ public abstract class BaseCoreActivity<VB extends ViewBinding> extends AppCompat
         mControllers.clear();
 
         // Presenter 解绑
-        for (IBasePresenter presenter : mPresenterList) {
-            presenter.detachView();
+        mPresenterList.forEach { presenter ->
+            presenter.detachView()
         }
+
         mPresenterList.clear();
-        binding = null;
+        binding = null
         super.onDestroy();
-
     }
 
-    @Override
-    public Activity getActivityContext() {
-        return this;
-    }
-
-    private void injectPresenters() {
-        Field[] fields = this.getClass().getDeclaredFields();
-        for (Field field : fields) {
-            if (field.isAnnotationPresent(InjectPresenter.class)) {
+    private fun injectPresenters() {
+        val fields = this.javaClass.declaredFields
+        for (field in fields) {
+            if (field.isAnnotationPresent(InjectPresenter::class.java)) {
                 try {
-                    Class<?> type = field.getType();
-                    if (IBasePresenter.class.isAssignableFrom(type)) {
-                        field.setAccessible(true);
-                        IBasePresenter presenter = (IBasePresenter) type.newInstance();
-                        presenter.attachView(this);
-                        field.set(this, presenter);
-                        mPresenterList.add(presenter);
+                    val type = field.type
+                    if (IBasePresenter::class.java.isAssignableFrom(type)) {
+                        field.isAccessible = true
+                        @Suppress("UNCHECKED_CAST")
+                        val presenter =
+                            type.getDeclaredConstructor().newInstance() as IBasePresenter<IBaseView>
+                        presenter.attachView(this)
+                        field.set(this, presenter)
+                        mPresenterList.add(presenter)
                     }
-                } catch (Exception e) {
-                    LogUtils.error(TAG,"@InjectPresenter 失败："+e);
+                } catch (e: Exception) {
+                    LogUtils.error(TAG, "@InjectPresenter 失败：$e")
                 }
             }
         }

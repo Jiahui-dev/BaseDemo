@@ -1,36 +1,30 @@
-package com.yjh.base.core;
+package com.yjh.base.core
 
-import android.annotation.SuppressLint;
-import android.app.Application;
-import android.content.Context;
-
-import com.yjh.base.utils.util.ToastUtils;
+import android.annotation.SuppressLint
+import android.app.Application
+import android.content.Context
 
 /**
- * Created by jiahui on 2025/12/16
+ * Created by youjiahui on 2026/10/2
  */
-public class BaseApplication extends Application {
-    // 提供一个静态的 Context，方便在类似 Utils 里使用
-    @SuppressLint("StaticFieldLeak")
-    private static Context context;
-
-    //单例变量用来存 Application 实例本身
-    @SuppressLint("StaticFieldLeak")
-    private static BaseApplication instance;
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        context = getApplicationContext();
-        instance = this;
+class BaseApplication : Application() {
+    companion object{
+        
+        @SuppressLint("StaticFieldLeak")
+        private lateinit var context: Context
+        
+        @SuppressLint("StaticFieldLeak")
+        private lateinit var instance: BaseApplication
+        
+        fun getAppContext(): Context=context
+        
+        fun getInstance(): BaseApplication=instance
+        
     }
 
-    public static Context getAppContext() {
-        return context;
+    override fun onCreate() {
+        super.onCreate()
+        context=applicationContext
+        instance=this
     }
-
-    public static BaseApplication getInstance() {
-        return instance;
-    }
-
 }

@@ -1,42 +1,38 @@
-package com.yjh.base.core.network;
+package com.yjh.base.core.network
 
-import androidx.annotation.NonNull;
-
-import com.yjh.base.utils.config.AppConfig;
-import com.yjh.base.utils.util.LogUtils;
-
-import java.util.concurrent.TimeUnit;
-
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
+import com.yjh.base.utils.config.AppConfig
+import com.yjh.base.utils.util.LogUtils
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import java.util.concurrent.TimeUnit
 
 /**
- * Created by jiahui on 2025/12/26
+ * Created by youjiahui on 2026/10/3
  */
-public class RetrofitFactory {
+object RetrofitFactory {
 
-    private static final String TAG = "RetrofitFactory";
+    private const val TAG = "RetrofitFactory"
+    private const val DEFAULT_TIMEOUT = 10L
 
-    private static final int DEFAULT_TIMEOUT = 10;
+    fun getBaseOkHttpBuilder(): OkHttpClient.Builder {
 
-    public static OkHttpClient.Builder getBaseOkHttpBuilder() {
-        OkHttpClient.Builder builder = new OkHttpClient.Builder();
-
-        builder.connectTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
-        builder.readTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
-        builder.writeTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
-
-        if (AppConfig.DEBUG_ENABLE) {
-            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
-                @Override
-                public void log(@NonNull String message) {
-                    LogUtils.debug(TAG, message);
-                }
-            });
-            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-            builder.addInterceptor(loggingInterceptor);
+        val builder = OkHttpClient.Builder().apply {
+            connectTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
+            readTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
+            writeTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)
         }
 
-        return builder;
+        if (AppConfig.DEBUG_ENABLE) {
+            val loggingInterceptor = HttpLoggingInterceptor { message ->
+                LogUtils.debug(TAG, message)
+            }.apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            }
+            builder.addInterceptor(loggingInterceptor)
+        }
+
+        return builder
+
     }
+
 }

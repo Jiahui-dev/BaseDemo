@@ -1,5 +1,8 @@
-package com.yjh.base.core.event.model;
+package com.yjh.base.core.event.model
 
-public class RefreshEvent {
-    // 这是一个空事件，仅作为通知信号
-}
+/**
+ * 这是一个空事件，仅作为通知信号
+ * Created by youjiahui on 2026/10/2
+ */
+object RefreshEvent
+

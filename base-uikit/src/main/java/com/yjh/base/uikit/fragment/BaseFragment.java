@@ -8,7 +8,6 @@ import android.widget.TextView;
 import androidx.viewbinding.ViewBinding;
 
 import com.gyf.immersionbar.ImmersionBar;
-import com.yjh.base.core.fragment.BaseCoreFragment;
 import com.yjh.base.uikit.R;
 import com.yjh.base.utils.util.ToastUtils;
 

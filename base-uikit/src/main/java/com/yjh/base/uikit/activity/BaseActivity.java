@@ -10,7 +10,6 @@ import androidx.annotation.Nullable;
 import androidx.viewbinding.ViewBinding;
 
 import com.gyf.immersionbar.ImmersionBar;
-import com.yjh.base.core.activity.BaseCoreActivity;
 import com.yjh.base.uikit.R;
 import com.yjh.base.utils.util.ToastUtils;
 

@@ -1,15 +1,8 @@
-package com.yjh.base.core.annotation;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package com.yjh.base.core.annotation
 
 /**
- * Created by jiahui on 2025/12/26
+ * Created by youjiahui on 2026/10/3
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface InjectPresenter {
-    // 标记注解，不需要传值
-}
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FIELD)
+annotation class InjectPresenter

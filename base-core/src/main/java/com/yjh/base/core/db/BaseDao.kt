@@ -1,39 +1,38 @@
-package com.yjh.base.core.db;
+package com.yjh.base.core.db
 
-import androidx.room.Delete;
-import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
-import androidx.room.Update;
-
-import java.util.List;
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Update
 
 /**
  * 通用数据库基础操作接口
- * Created by jiahui on 2026/07/11
+ * Created by youjiahui on 2026/10/4
  */
-public interface BaseDao<T> {
+interface BaseDao<T> {
 
-    //插入单挑，如果主键冲突直接替换旧数据
+    // 插入单条，如果主键冲突直接替换旧数据
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long insert(T item);
+    fun insert(item: T): Long
 
-    //批量插入
+    // 批量插入
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long[] insert(List<T> items);
+    fun insert(items: List<T>): LongArray
 
-    //删除单条
+    // 删除单条
     @Delete
-    int delete(T item);
+    fun delete(item: T): Int
 
-    //批量删除
+    // 批量删除
     @Delete
-    int delete(List<T> items);
+    fun delete(items: List<T>): Int
 
-    //更新单条
+    // 更新单条
     @Update
-    int update(T item);
+    fun update(item: T): Int
 
-    //批量更新
+    // 批量更新
     @Update
-    int update(List<T> items);
+    fun update(items: List<T>): Int
+
 }

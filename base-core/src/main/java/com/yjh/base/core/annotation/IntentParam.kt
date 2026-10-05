@@ -1,19 +1,14 @@
-package com.yjh.base.core.annotation;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package com.yjh.base.core.annotation
 
 /**
- * Created by jiahui on 2026/07/11
+ * Created by youjiahui on 2026/10/3
  */
-@Target(ElementType.FIELD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface IntentParam {
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FIELD)
+annotation class IntentParam(
     /**
      * Intent传值对应的Key
      * 如果保持默认（空字符串），框架会自动使用对应的变量名作为Key
      */
-    String name() default "";
-}
+    val name: String = ""
+)

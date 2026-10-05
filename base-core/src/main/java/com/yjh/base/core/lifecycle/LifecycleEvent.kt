@@ -1,10 +1,9 @@
-package com.yjh.base.core.lifecycle;
+package com.yjh.base.core.lifecycle
 
 /**
- * Created by jiahui on 2026/07/11
+ * Created by youjiahui on 2026/10/2
  */
-public enum LifecycleEvent {
-
+enum class LifecycleEvent {
     /**
      * 1.内存、数据结构初始化阶段
      */
@@ -44,6 +43,4 @@ public enum LifecycleEvent {
      * 8.页面销毁，必须强制清理内存、切断引用
      */
     ON_DESTROY
-
 }
-

@@ -1,18 +1,18 @@
-package com.yjh.base.core.contract;
+package com.yjh.base.core.contract
 
 /**
  * 所有 Presenter 的基类接口
- * Created by jiahui on 2026/01/28
+ * Created by youjiahui on 2026/10/3
  */
-public interface IBasePresenter<V extends IBaseView> {
-    
+interface IBasePresenter<V : IBaseView> {
+
     //绑定 View
-    void attachView(V view);
+    fun attachView(view: V)
 
     //解绑 View
-    void detachView();
+    fun detachView()
 
-    //获取 View 引用，通常由实现类处理
-    V getView();
+    //获取 View 的引用，通常由实现类处理
+    val view: V?
 
 }

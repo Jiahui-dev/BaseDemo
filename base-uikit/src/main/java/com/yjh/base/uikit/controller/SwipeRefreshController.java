@@ -7,8 +7,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.yjh.base.uikit.listener.IRefreshListener;
 import com.yjh.base.utils.util.LogUtils;
-import com.yjh.base.core.lifecycle.Lifecycle;
-import com.yjh.base.core.lifecycle.LifecycleEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
