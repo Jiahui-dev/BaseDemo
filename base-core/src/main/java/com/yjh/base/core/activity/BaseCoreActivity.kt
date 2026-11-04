@@ -21,7 +21,7 @@ abstract class BaseCoreActivity<VB : ViewBinding> : AppCompatActivity(), IBaseVi
 
     private val TAG: String = "BaseCoreActivity"
 
-    protected var binding: VB? = null
+    var binding: VB? = null
 
     private val mPresenterList = ArrayList<IBasePresenter<*>>()
 
@@ -111,13 +111,13 @@ abstract class BaseCoreActivity<VB : ViewBinding> : AppCompatActivity(), IBaseVi
 
     protected abstract fun initBinding(inflater: LayoutInflater): VB
 
-    protected fun initView() {}
+    protected open fun initView() {}
 
-    protected fun initListener() {}
+    protected open fun initListener() {}
 
-    protected fun initEvent() {}
+    protected open fun initEvent() {}
 
-    protected fun initData() {}
+    protected open fun initData() {}
 
     override fun onStart() {
         super.onStart()

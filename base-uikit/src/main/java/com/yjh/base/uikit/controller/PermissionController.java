@@ -7,6 +7,9 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
 
+import com.yjh.base.core.lifecycle.Lifecycle;
+import com.yjh.base.core.lifecycle.LifecycleEvent;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

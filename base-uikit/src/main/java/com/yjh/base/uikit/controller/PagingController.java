@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import com.yjh.base.core.lifecycle.Lifecycle;
+import com.yjh.base.core.lifecycle.LifecycleEvent;
 import com.yjh.base.uikit.activity.BaseRecyclerActivity;
 import com.yjh.base.uikit.adapter.SimpleAdapter;
 import com.yjh.base.uikit.databinding.UikitViewLoadMoreBinding;

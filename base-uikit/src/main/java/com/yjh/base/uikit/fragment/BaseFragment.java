@@ -8,6 +8,7 @@ import android.widget.TextView;
 import androidx.viewbinding.ViewBinding;
 
 import com.gyf.immersionbar.ImmersionBar;
+import com.yjh.base.core.fragment.BaseCoreFragment;
 import com.yjh.base.uikit.R;
 import com.yjh.base.utils.util.ToastUtils;
 
@@ -68,11 +69,11 @@ public abstract class BaseFragment<VB extends ViewBinding> extends BaseCoreFragm
 
     @Override
     public void showLoading(String msg) {
-        if (mActivity == null || mActivity.isFinishing()) return;
+        if (getActivity() == null || getActivity().isFinishing()) return;
 
         if (mLoadingDialog == null) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-            View view = LayoutInflater.from(mActivity).inflate(R.layout.uikit_view_loading_bar, null);
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            View view = LayoutInflater.from(getActivity()).inflate(R.layout.uikit_view_loading_bar, null);
             mTvLoadingMsg = view.findViewById(R.id.tv_dialogMsg);
             builder.setView(view);
             builder.setCancelable(false);
