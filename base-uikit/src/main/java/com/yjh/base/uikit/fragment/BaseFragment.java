@@ -47,6 +47,7 @@ public abstract class BaseFragment<VB extends ViewBinding> extends BaseCoreFragm
     }
 
     protected void initImmersionBar() {
+        if (getActivity() == null) return;
         ImmersionBar.with(this)
                 .statusBarColor(getStatusBarColor())
                 .statusBarDarkFont(isStatusBarDarkFont())
@@ -67,21 +68,31 @@ public abstract class BaseFragment<VB extends ViewBinding> extends BaseCoreFragm
         return true;
     }
 
+    // ==================== Loading 相关 ====================
+
     @Override
     public void showLoading(String msg) {
-        if (mActivity == null || mActivity.isFinishing()) return;
+        // 增加 Fragment 状态判断，防止视图已销毁或已脱离 Activity 时弹窗崩溃
+        if (getActivity() == null || getActivity().isFinishing() || !isAdded()) {
+            return;
+        }
 
         if (mLoadingDialog == null) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-            View view = LayoutInflater.from(mActivity).inflate(R.layout.uikit_view_loading_bar, null);
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            View view = LayoutInflater.from(getActivity()).inflate(R.layout.uikit_view_loading_bar, null);
             mTvLoadingMsg = view.findViewById(R.id.tv_dialogMsg);
             builder.setView(view);
             builder.setCancelable(false);
             mLoadingDialog = builder.create();
             Objects.requireNonNull(mLoadingDialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
         }
-        if (mTvLoadingMsg != null) mTvLoadingMsg.setText(msg);
-        if (!mLoadingDialog.isShowing()) mLoadingDialog.show();
+
+        if (mTvLoadingMsg != null) {
+            mTvLoadingMsg.setText(msg);
+        }
+        if (!mLoadingDialog.isShowing()) {
+            mLoadingDialog.show();
+        }
     }
 
     @Override
@@ -97,6 +108,15 @@ public abstract class BaseFragment<VB extends ViewBinding> extends BaseCoreFragm
     }
 
     @Override
+    public void onDestroyView() {
+        // 在视图销毁时关闭弹窗，防止内存泄漏
+        hideLoading();
+        mLoadingDialog = null;
+        mTvLoadingMsg = null;
+        super.onDestroyView();
+    }
+
+    @Override
     public void onDestroy() {
         if (mLoadingDialog != null) {
             mLoadingDialog.dismiss();
@@ -105,4 +125,27 @@ public abstract class BaseFragment<VB extends ViewBinding> extends BaseCoreFragm
         super.onDestroy();
     }
 
+    protected void setClick(View.OnClickListener listener, View... views) {
+        setClick(500, listener, views);
+    }
+
+    protected void setClick(final long delayMilliseconds, final View.OnClickListener listener, View... views) {
+        if (views == null || listener == null) return;
+        for (View view : views) {
+            if (view != null) {
+                view.setOnClickListener(new View.OnClickListener() {
+                    private long lastClickTime = 0;
+
+                    @Override
+                    public void onClick(View v) {
+                        long currentTime = System.currentTimeMillis();
+                        if (currentTime - lastClickTime >= delayMilliseconds) {
+                            lastClickTime = currentTime;
+                            listener.onClick(v);
+                        }
+                    }
+                });
+            }
+        }
+    }
 }
