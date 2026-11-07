@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:enterFadeDuration="30"
+    android:exitFadeDuration="30">
+
+<item android:state_selected="true" android:drawable="@drawable/uikit_icon_arrow_up" />
+
+<item android:drawable="@drawable/uikit_icon_arrow_down" />
+    </selector>

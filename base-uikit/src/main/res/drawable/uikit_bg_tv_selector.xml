@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:enterFadeDuration="200"
+    android:exitFadeDuration="200">
+
+    <!-- 1. 选中/展开状态时的背景 (比如：灰色填充 + 蓝色边框) -->
+    <item android:state_selected="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#F5F5F5" /> <!-- 展开时的浅灰背景 -->
+            <stroke android:width="1dp" android:color="#0088FF" /> <!-- 展开时的蓝色边框 -->
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+
+    <!-- 2. 默认/收起状态时的背景 (直接引用你原本的 uikit_shape_stroke) -->
+    <item android:drawable="@drawable/uikit_shape_stroke" />
+
+</selector>
