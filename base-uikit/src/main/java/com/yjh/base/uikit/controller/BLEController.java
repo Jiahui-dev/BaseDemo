@@ -13,6 +13,7 @@ import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -55,22 +56,46 @@ public class BLEController {
     // 当前 MTU payload（默认 20 = 23 - 3）
     private int currentMtuPayload = 20;
 
-    /** 是否自动请求 MTU 协商（某些设备固件不支持，设为 false） */
+    /**
+     * 是否自动请求 MTU 协商（某些设备固件不支持，设为 false）
+     */
     private boolean autoRequestMtu = false;
-    /** MTU 协商时请求的目标值 */
+    /**
+     * MTU 协商时请求的目标值
+     */
     private int targetMtu = 512;
 
-    /** discoverServices 延迟（毫秒）—— 连接成功后等一会儿再 discover，提高成功率 */
+    /**
+     * discoverServices 延迟（毫秒）—— 连接成功后等一会儿再 discover，提高成功率
+     */
     private long discoverDelayMs = 300;
-    /** discoverServices 重试间隔 */
+    /**
+     * discoverServices 重试间隔
+     */
     private long discoverRetryMs = 3000;
-    /** discoverServices 最大重试次数 */
+    /**
+     * discoverServices 最大重试次数
+     */
     private int discoverMaxRetry = 2;
     private int discoverRetryCount = 0;
     private Runnable discoverRetryRunnable;
 
-    /** 扫描超时 */
-    private static final long SCAN_TIMEOUT = 10000;
+    /**
+     * 扫描窗口：单次注册扫描的时长（毫秒）。窗口越长，stop/start 次数越少，越不容易被系统限流
+     */
+    private static final long DEFAULT_SCAN_WINDOW = 30000;
+    private long scanWindowMs = DEFAULT_SCAN_WINDOW;
+
+    /**
+     * 低延迟 + 全回调：占空比最高，目标设备广播一到就能发现
+     */
+    private final ScanSettings scanSettings = new ScanSettings.Builder()
+            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+            .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
+            .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
+            .setReportDelay(0)
+            .build();
+
     private final Runnable scanTimeoutRunnable = new Runnable() {
         @Override
         public void run() {
@@ -80,7 +105,9 @@ public class BLEController {
 
     private final ConcurrentLinkedQueue<byte[]> sendQueue = new ConcurrentLinkedQueue<>();
     private final AtomicBoolean isSending = new AtomicBoolean(false);
-    /** 无响应写的包间隔（毫秒） */
+    /**
+     * 无响应写的包间隔（毫秒）
+     */
     private static final long WRITE_INTERVAL_MS = 20;
     private boolean waitingWriteCallback = false;
     private Runnable writeFallback;
@@ -128,17 +155,23 @@ public class BLEController {
         Log.d(TAG, "setAutoRequestMtu=" + enabled);
     }
 
-    /** 设置 MTU 协商目标值（默认 512） */
+    /**
+     * 设置 MTU 协商目标值（默认 512）
+     */
     public void setTargetMtu(int mtu) {
         this.targetMtu = mtu;
     }
 
-    /** 设置 discoverServices 延迟（默认 300ms） */
+    /**
+     * 设置 discoverServices 延迟（默认 300ms）
+     */
     public void setDiscoverDelayMs(long ms) {
         this.discoverDelayMs = ms;
     }
 
-    /** 设置是否使用 WRITE_TYPE_NO_RESPONSE（默认 true） */
+    /**
+     * 设置是否使用 WRITE_TYPE_NO_RESPONSE（默认 true）
+     */
     public void setWriteTypeNoResponse(boolean noResponse) {
         this.writeTypeNoResponse = noResponse;
     }
@@ -155,12 +188,16 @@ public class BLEController {
         return isConnected;
     }
 
-    /** 是否已连接并准备好收发数据（服务发现 + 特征订阅完成） */
+    /**
+     * 是否已连接并准备好收发数据（服务发现 + 特征订阅完成）
+     */
     public boolean isReadyForSend() {
         return isReady && bluetoothGatt != null && writeCharacteristic != null;
     }
 
-    /** 当前 MTU payload（字节数），默认 20 */
+    /**
+     * 当前 MTU payload（字节数），默认 20
+     */
     public int getMtuPayload() {
         return currentMtuPayload;
     }
@@ -192,7 +229,8 @@ public class BLEController {
             if (scanner != null) {
                 try {
                     scanner.stopScan(scanCallback);
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
             }
             isScanning = false;
             mainHandler.removeCallbacks(scanTimeoutRunnable);
@@ -215,16 +253,17 @@ public class BLEController {
         mainHandler.removeCallbacks(scanTimeoutRunnable);
 
         try {
-            scanner.startScan(scanCallback);
-            Log.d(TAG, "startScan requested successfully");
+            scanner.startScan(null, scanSettings, scanCallback);
+            Log.d(TAG, "startScan requested successfully, window=" + scanWindowMs + "ms");
         } catch (Exception e) {
             Log.e(TAG, "startScan exception: " + e.getMessage());
             isScanning = false;
-            if (bleListener != null) bleListener.onConnectionFailed("Scan exception: " + e.getMessage());
+            if (bleListener != null)
+                bleListener.onConnectionFailed("Scan exception: " + e.getMessage());
             return;
         }
 
-        mainHandler.postDelayed(scanTimeoutRunnable, SCAN_TIMEOUT);
+        mainHandler.postDelayed(scanTimeoutRunnable, scanWindowMs);
     }
 
     public void stopScan() {
@@ -302,7 +341,9 @@ public class BLEController {
         }
     }
 
-    /** 使用上次的连接参数重连（无需外部传入 Context，由内部维护） */
+    /**
+     * 使用上次的连接参数重连（无需外部传入 Context，由内部维护）
+     */
     public boolean reconnect() {
         if (lastDeviceAddress == null) return false;
         connect(this.context, lastDeviceAddress, lastServiceUuid, lastNotifyUuid, lastWriteUuid);
@@ -329,7 +370,8 @@ public class BLEController {
         if (bluetoothGatt != null) {
             try {
                 bluetoothGatt.close();
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
             bluetoothGatt = null;
         }
         writeCharacteristic = null;
@@ -479,7 +521,9 @@ public class BLEController {
         }
     };
 
-    /** 在全部已发现服务中按 UUID 查找特征（用于读写服务分离的设备） */
+    /**
+     * 在全部已发现服务中按 UUID 查找特征（用于读写服务分离的设备）
+     */
     private BluetoothGattCharacteristic findCharacteristicInAllServices(BluetoothGatt gatt, UUID charUuid) {
         if (gatt == null || charUuid == null) return null;
         for (BluetoothGattService s : gatt.getServices()) {
@@ -527,7 +571,9 @@ public class BLEController {
 
     // ==================== 数据发送 ====================
 
-    /** 直接发送完整数据（数据长度不能超过 MTU payload） */
+    /**
+     * 直接发送完整数据（数据长度不能超过 MTU payload）
+     */
     public boolean writeData(byte[] data) {
         if (bluetoothGatt == null || writeCharacteristic == null || data == null) return false;
         writeCharacteristic.setValue(data);
@@ -537,12 +583,16 @@ public class BLEController {
         return bluetoothGatt.writeCharacteristic(writeCharacteristic);
     }
 
-    /** 分包发送：根据当前 MTU payload 自动切分 */
+    /**
+     * 分包发送：根据当前 MTU payload 自动切分
+     */
     public void writeDataChunked(byte[] data) {
         writeDataChunked(data, currentMtuPayload);
     }
 
-    /** 分包发送：指定 chunkSize */
+    /**
+     * 分包发送：指定 chunkSize
+     */
     public void writeDataChunked(byte[] data, int chunkSize) {
         if (data == null || data.length == 0) return;
         if (bluetoothGatt == null || writeCharacteristic == null) {

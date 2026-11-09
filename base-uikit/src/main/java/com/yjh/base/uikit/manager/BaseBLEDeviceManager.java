@@ -34,13 +34,16 @@ public abstract class BaseBLEDeviceManager implements BLEConnectionListener {
 
     // 配置参数（子类可在构造函数或子类初始化时修改）
     protected long handshakeIntervalMs = 2000;   // 默认 2 秒防息屏心跳包
-    protected long reconnectDelayMs = 20000;     // 默认 20 秒断线重连
-    protected long scanTimeoutMs = 15000;        // 扫描超时重试
+    protected long reconnectDelayMs = 5000;      // 首次断线重连延迟，失败后指数退避
+    protected long maxReconnectDelayMs = 30000;  // 退避上限
 
     // 内部任务 Runnable
     private Runnable handshakeRunnable;
     private Runnable reconnectRunnable;
-    private Runnable scanTimeoutRunnable;
+    /**
+     * 连续重连失败次数，用于指数退避，连接成功后清零
+     */
+    private int reconnectAttempt = 0;
 
     public BaseBLEDeviceManager() {
         this.bleController = BLEController.getInstance();
@@ -94,6 +97,7 @@ public abstract class BaseBLEDeviceManager implements BLEConnectionListener {
             return;
         }
         isStarted = true;
+        reconnectAttempt = 0;
         Log.d(TAG, "Manager started.");
 
         // 绑定底层监听
@@ -124,25 +128,19 @@ public abstract class BaseBLEDeviceManager implements BLEConnectionListener {
 
         isScanning = true;
         onStatusChanged(false, "正在扫描目标设备...");
+        // 扫描窗口由 BleController 统一控制（默认 30s），窗口结束后经 onScanFinished 重新发起，
+        // 这里不再叠加第二套超时重扫，避免同一时刻重复注册扫描被系统限流
         bleController.startScan();
-
-        // 扫描超时保护：超时未找到则重新开始扫描
-        if (scanTimeoutRunnable == null) {
-            scanTimeoutRunnable = () -> {
-                if (isScanning && !isConnected) {
-                    Log.d(TAG, "Scan timeout, restarting scan...");
-                    bleController.stopScan();
-                    mainHandler.postDelayed(this::startScan, 2000);
-                }
-            };
-        }
-        mainHandler.removeCallbacks(scanTimeoutRunnable);
-        mainHandler.postDelayed(scanTimeoutRunnable, scanTimeoutMs);
     }
 
     protected void scheduleReconnect() {
         if (!isStarted) return;
         cancelReconnectTask();
+
+        // 指数退避：5s → 10s → 20s → 30s（上限），连接成功后清零
+        long delay = Math.min(reconnectDelayMs << Math.min(reconnectAttempt, 4), maxReconnectDelayMs);
+        reconnectAttempt++;
+        onStatusChanged(false, "将在 " + (delay / 1000) + " 秒后尝试重连...");
 
         reconnectRunnable = () -> {
             if (!isStarted || isConnected) return;
@@ -157,7 +155,7 @@ public abstract class BaseBLEDeviceManager implements BLEConnectionListener {
                 startScan();
             }
         };
-        mainHandler.postDelayed(reconnectRunnable, reconnectDelayMs);
+        mainHandler.postDelayed(reconnectRunnable, delay);
     }
 
     private void startHandshakeLoop() {
@@ -178,7 +176,6 @@ public abstract class BaseBLEDeviceManager implements BLEConnectionListener {
     }
 
     private void cancelAllTasks() {
-        mainHandler.removeCallbacks(scanTimeoutRunnable);
         cancelHandshakeTask();
         cancelReconnectTask();
     }
@@ -205,7 +202,6 @@ public abstract class BaseBLEDeviceManager implements BLEConnectionListener {
         if (isTargetDevice(device, rssi)) {
             Log.d(TAG, "Target device found: " + device.getName() + " [" + device.getAddress() + "]");
             isScanning = false;
-            mainHandler.removeCallbacks(scanTimeoutRunnable);
             bleController.stopScan();
 
             isConnecting = true;
@@ -233,6 +229,7 @@ public abstract class BaseBLEDeviceManager implements BLEConnectionListener {
     @Override
     public void onServicesDiscovered() {
         isConnected = true;
+        reconnectAttempt = 0;
         cancelReconnectTask();
         onStatusChanged(true, "连接成功，链路就绪");
 
@@ -250,8 +247,7 @@ public abstract class BaseBLEDeviceManager implements BLEConnectionListener {
         onStatusChanged(false, "设备已断开连接");
 
         if (isStarted) {
-            // 触发 20 秒断线重连
-            onStatusChanged(false, "将在 " + (reconnectDelayMs / 1000) + " 秒后尝试重连...");
+            // 触发断线重连（首次 5 秒，失败后指数退避）
             scheduleReconnect();
         }
     }
