@@ -15,7 +15,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.leben.basedemo"
+        applicationId "com.yjh.basedemo"
         minSdk 24
         targetSdk 36
         versionCode 1
@@ -45,5 +45,6 @@ dependencies {
     androidTestImplementation libs.espresso.core
 
     implementation project(':base-uikit')
+    implementation project(':ble-kit')
 
 }

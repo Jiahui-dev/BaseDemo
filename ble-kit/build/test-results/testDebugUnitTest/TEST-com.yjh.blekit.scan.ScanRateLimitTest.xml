@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.yjh.blekit.scan.ScanRateLimitTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-09T07:34:43.523Z" hostname="WINDOWS" time="0.004">
+  <properties/>
+  <testcase name="窗口滑过后重新可用" classname="com.yjh.blekit.scan.ScanRateLimitTest" time="0.0"/>
+  <testcase name="未达上限时 nextAvailableAt 返回当前时间" classname="com.yjh.blekit.scan.ScanRateLimitTest" time="0.0"/>
+  <testcase name="窗口内最多启动 5 次" classname="com.yjh.blekit.scan.ScanRateLimitTest" time="0.003"/>
+  <testcase name="窗口内的部分启动过期后只占用剩余名额" classname="com.yjh.blekit.scan.ScanRateLimitTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

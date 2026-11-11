@@ -13,6 +13,8 @@
             <option value="$PROJECT_DIR$/base-core" />
             <option value="$PROJECT_DIR$/base-uikit" />
             <option value="$PROJECT_DIR$/base-utils" />
+            <option value="$PROJECT_DIR$/ble-kit" />
+            <option value="$PROJECT_DIR$/core" />
           </set>
         </option>
       </GradleProjectSettings>
